@@ -6,7 +6,7 @@ require("dotenv").config({ path: path.resolve(__dirname, "./.env") });
 
 const app = express();
 
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3011;
 
 // Body parser middleware
 app.use(bodyParser.json());
@@ -37,9 +37,26 @@ const NominationSchema = new mongoose.Schema({
 // Model
 const Nomination = mongoose.model("Nomination", NominationSchema);
 
+const VoteSchema = new mongoose.Schema({
+  id: String,
+  nominationId: String,
+  createdAt: Date,
+  fid: String,
+});
+
+const Vote = mongoose.model("Vote", VoteSchema);
+
 // Create
 app.post("/nominations", (req, res) => {
   const newItem = new Nomination(req.body);
+  newItem
+    .save()
+    .then((item) => res.status(201).send(item))
+    .catch((err) => res.status(400).send(err));
+});
+
+app.post("/votes", (req, res) => {
+  const newItem = new Vote(req.body);
   newItem
     .save()
     .then((item) => res.status(201).send(item))
