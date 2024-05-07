@@ -23,29 +23,6 @@ db.once("open", function () {
   console.log("Connected successfully to MongoDB");
 });
 
-// Schema
-const NominationSchema = new mongoose.Schema({
-  id: String,
-  username: String,
-  castId: String,
-  fid: Number,
-  createdAt: Date,
-  weight: Number,
-  votesCount: Number,
-});
-
-// Model
-const Nomination = mongoose.model("Nomination", NominationSchema);
-
-const VoteSchema = new mongoose.Schema({
-  id: String,
-  nominationId: String,
-  createdAt: Date,
-  fid: String,
-});
-
-const Vote = mongoose.model("Vote", VoteSchema);
-
 app.post("/nominations", async (req, res) => {
   const startToday = new Date();
   startToday.setUTCHours(0, 0, 0, 0);
@@ -103,7 +80,6 @@ app.post("/votes", (req, res) => {
 
 app.get("/votes", (req, res) => {
   Vote.find()
-    .limit(5)
     .then((votes) => res.status(200).send(votes))
     .catch((err) => res.status(500).send(err));
 });
@@ -154,6 +130,40 @@ app.get("/nominations", (req, res) => {
     .limit(5)
     .then((nominations) => res.status(200).send(nominations))
     .catch((err) => res.status(500).send(err));
+});
+
+app.get("/current-period", async (req, res) => {
+  try {
+    const now = new Date();
+    const rounds = await Round.find({
+      $or: [
+        {
+          nominationEndTime: { $gte: now },
+          nominationStartTime: { $lte: now },
+        },
+        { votingEndTime: { $gte: now }, votingStartTime: { $lte: now } },
+      ],
+    });
+
+    const currentPeriods = rounds.map((round) => {
+      let period = "inactive";
+      if (now >= round.nominationStartTime && now <= round.nominationEndTime) {
+        period = "nomination";
+      } else if (now >= round.votingStartTime && now <= round.votingEndTime) {
+        period = "voting";
+      }
+      return {
+        roundId: round.roundId,
+        period,
+        status: round.status,
+      };
+    });
+
+    res.json(currentPeriods);
+  } catch (error) {
+    console.error("Failed to determine current periods", error);
+    res.status(500).send("Internal Server Error");
+  }
 });
 
 app.listen(port, () => {
