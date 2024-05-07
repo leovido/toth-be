@@ -101,6 +101,13 @@ app.post("/votes", (req, res) => {
     .catch((err) => res.status(400).send(err));
 });
 
+app.get("/votes", (req, res) => {
+  Vote.find()
+    .limit(5)
+    .then((votes) => res.status(200).send(votes))
+    .catch((err) => res.status(500).send(err));
+});
+
 app.get("/nominations", (req, res) => {
   const startToday = new Date();
   startToday.setUTCHours(0);
