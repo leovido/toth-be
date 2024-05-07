@@ -46,13 +46,51 @@ const VoteSchema = new mongoose.Schema({
 
 const Vote = mongoose.model("Vote", VoteSchema);
 
-// Create
-app.post("/nominations", (req, res) => {
-  const newItem = new Nomination(req.body);
-  newItem
-    .save()
-    .then((item) => res.status(201).send(item))
-    .catch((err) => res.status(400).send(err));
+app.post("/nominations", async (req, res) => {
+  const startToday = new Date();
+  startToday.setUTCHours(0, 0, 0, 0);
+
+  const endToday = new Date();
+  endToday.setUTCHours(18, 0, 0, 0);
+
+  try {
+    const matches = await Nomination.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: startToday, $lte: endToday },
+          nominationId: req.body.nominationId,
+        },
+      },
+      {
+        $lookup: {
+          from: "votes",
+          localField: "id",
+          foreignField: "nominationId",
+          as: "votes",
+        },
+      },
+      {
+        $addFields: {
+          votesCount: { $size: "$votes" },
+        },
+      },
+    ]);
+
+    if (matches.length === 0) {
+      const newItem = new Nomination(req.body);
+      const item = await newItem.save();
+      res.status(201).send(item);
+    } else {
+      const weightToAdd = req.body.isPowerUser ? 3 : 1;
+      await Nomination.updateOne(
+        { _id: matches[0]._id },
+        { $inc: { weight: weightToAdd } }
+      );
+      res.status(200).send({ message: "Nomination updated successfully" });
+    }
+  } catch (err) {
+    res.status(400).send(err);
+  }
 });
 
 app.post("/votes", (req, res) => {
