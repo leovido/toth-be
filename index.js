@@ -63,7 +63,6 @@ app.post("/votes", (req, res) => {
     .catch((err) => res.status(400).send(err));
 });
 
-// Read
 app.get("/nominations", (req, res) => {
   const startToday = new Date();
   startToday.setUTCHours(0);
@@ -77,12 +76,33 @@ app.get("/nominations", (req, res) => {
   endToday.setUTCSeconds(0);
   endToday.setUTCMilliseconds(0);
 
-  Nomination.find({
-    createdAt: {
-      $gte: startToday,
-      $lte: endToday,
-    },
-  })
+  Nomination.aggregate([
+    [
+      {
+        $match: {
+          createdAt: {
+            $gte: startToday,
+            $lte: endToday,
+          },
+        },
+      },
+      {
+        $lookup: {
+          from: "votes",
+          localField: "id",
+          foreignField: "nominationId",
+          as: "votes",
+        },
+      },
+      {
+        $addFields: {
+          votesCount: {
+            $size: "$votes",
+          },
+        },
+      },
+    ],
+  ])
     .sort({
       weight: -1,
     })
