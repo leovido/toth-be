@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-export const NominationSchema = new mongoose.Schema({
+const NominationSchema = new mongoose.Schema({
   id: String,
   username: String,
   castId: String,
@@ -10,4 +10,6 @@ export const NominationSchema = new mongoose.Schema({
   votesCount: Number,
 });
 
-export const Nomination = mongoose.model("Nomination", NominationSchema);
+const Nomination = mongoose.model("Nomination", NominationSchema);
+
+module.exports = Nomination;

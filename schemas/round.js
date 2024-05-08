@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-export const roundSchema = new mongoose.Schema({
+const roundSchema = new mongoose.Schema({
   roundId: String,
   nominationStartTime: Date,
   nominationEndTime: Date,
@@ -10,4 +10,6 @@ export const roundSchema = new mongoose.Schema({
   winner: { type: mongoose.Schema.Types.ObjectId, ref: "Nomination" },
 });
 
-export const Round = mongoose.model("Round", roundSchema);
+const Round = mongoose.model("Round", roundSchema);
+
+module.exports = Round;

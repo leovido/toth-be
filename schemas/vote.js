@@ -1,10 +1,12 @@
 const mongoose = require("mongoose");
 
-export const VoteSchema = new mongoose.Schema({
+const VoteSchema = new mongoose.Schema({
   id: String,
   nominationId: String,
   createdAt: Date,
   fid: String,
 });
 
-export const Vote = mongoose.model("Vote", VoteSchema);
+const Vote = mongoose.model("Vote", VoteSchema);
+
+module.exports = Vote;

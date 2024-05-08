@@ -2,6 +2,10 @@ const express = require("express");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const path = require("path");
+const Nomination = require("./schemas/nomination");
+const Vote = require("./schemas/vote");
+const Round = require("./schemas/round");
+
 require("dotenv").config({ path: path.resolve(__dirname, "./.env") });
 
 const app = express();
@@ -130,6 +134,21 @@ app.get("/nominations", (req, res) => {
     .limit(5)
     .then((nominations) => res.status(200).send(nominations))
     .catch((err) => res.status(500).send(err));
+});
+
+app.get("/history", async (req, res) => {
+  try {
+    const nominations = await Nomination.find({
+      fid: {
+        $eq: req.query.fid,
+      },
+    });
+
+    res.json(nominations);
+  } catch (error) {
+    console.error("Failed to fetch history", error);
+    res.status(500).send("Internal Server Error");
+  }
 });
 
 app.get("/current-period", async (req, res) => {
