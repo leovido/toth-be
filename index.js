@@ -74,12 +74,30 @@ app.post("/nominations", async (req, res) => {
   }
 });
 
-app.post("/votes", (req, res) => {
-  const newItem = new Vote(req.body);
-  newItem
-    .save()
-    .then((item) => res.status(201).send(item))
-    .catch((err) => res.status(400).send(err));
+app.post("/votes", async (req, res) => {
+  const { roundId, fid } = req.body;
+  const round = await Round.findById(roundId);
+
+  const now = new Date();
+  if (now < round.votingStartTime || now > round.votingEndTime) {
+    return res
+      .status(400)
+      .send({ error: "Voting is not currently allowed for this round." });
+  }
+
+  const existingVote = Vote.findOne({
+    fid: fid,
+  });
+
+  if (!existingVote) {
+    const newItem = new Vote(req.body);
+    newItem
+      .save()
+      .then((item) => res.status(201).send(item))
+      .catch((err) => res.status(400).send(err));
+  } else {
+    return res.status(400).send({ error: "You already voted" });
+  }
 });
 
 app.get("/votes", (req, res) => {
