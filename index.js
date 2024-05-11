@@ -6,6 +6,7 @@ const Nomination = require("./schemas/nomination");
 const Vote = require("./schemas/vote");
 const Round = require("./schemas/round");
 const { setupCronJobs } = require("./cronjobs");
+const cryptoModule = require("crypto");
 
 require("dotenv").config({ path: path.resolve(__dirname, "./.env") });
 
@@ -43,7 +44,7 @@ app.post("/nominations", async (req, res) => {
       {
         $match: {
           createdAt: { $gte: startToday, $lte: endToday },
-          nominationId: req.body.nominationId,
+          fid: req.body.fid,
         },
       },
       {
@@ -62,16 +63,17 @@ app.post("/nominations", async (req, res) => {
     ]);
 
     if (matches.length === 0) {
-      const newItem = new Nomination(req.body);
-      const item = await newItem.save();
-      res.status(201).send(item);
+      const isValid = await Nomination.validate(req.body);
+
+      if (isValid) {
+        const newItem = new Nomination(req.body);
+        const item = await newItem.save();
+        res.status(201).send(item);
+      } else {
+        res.status(400).send("Invalid nomination");
+      }
     } else {
-      const weightToAdd = req.body.isPowerUser ? 3 : 1;
-      await Nomination.updateOne(
-        { _id: matches[0]._id },
-        { $inc: { weight: weightToAdd } }
-      );
-      res.status(200).send({ message: "Nomination updated successfully" });
+      res.status(200).send("Already nominated");
     }
   } catch (err) {
     res.status(400).send(err);
@@ -79,28 +81,43 @@ app.post("/nominations", async (req, res) => {
 });
 
 app.post("/votes", async (req, res) => {
-  const { roundId, fid } = req.body;
-  const round = await Round.findById(roundId);
+  try {
+    const { roundId, fid } = req.body;
+    const round = await Round.find({
+      id: roundId,
+    });
 
-  const now = new Date();
-  if (now < round.votingStartTime || now > round.votingEndTime) {
-    return res
-      .status(400)
-      .send({ error: "Voting is not currently allowed for this round." });
-  }
+    const now = new Date();
+    if (now < round.votingStartTime || now > round.votingEndTime) {
+      return res
+        .status(400)
+        .send({ error: "Voting is not currently allowed for this round." });
+    }
 
-  const existingVote = Vote.findOne({
-    fid: fid,
-  });
-
-  if (!existingVote) {
-    const newItem = new Vote(req.body);
-    newItem
-      .save()
-      .then((item) => res.status(201).send(item))
-      .catch((err) => res.status(400).send(err));
-  } else {
-    return res.status(400).send({ error: "You already voted" });
+    Vote.aggregate([
+      {
+        $match: {
+          roundId: roundId,
+          createdAt: { $gte: now },
+          fid: fid,
+        },
+      },
+    ])
+      .then((votes) => {
+        if (votes.length > 0) {
+          return res.status(400).send({ error: "You already voted" });
+        } else {
+          const newItem = new Vote(req.body);
+          newItem.validateSync();
+          newItem
+            .save()
+            .then((item) => res.status(201).send(item))
+            .catch((err) => res.status(400).send(err));
+        }
+      })
+      .catch((err) => res.status(500).send(err));
+  } catch (e) {
+    return res.status(400).send({ error: `${e}` });
   }
 });
 
@@ -114,6 +131,37 @@ app.get("/rounds", (req, res) => {
   Round.find()
     .then((votes) => res.status(200).send(votes))
     .catch((err) => res.status(500).send(err));
+});
+
+app.post("/rounds", async (req, res) => {
+  const nominationEndTime = new Date();
+  nominationEndTime.setUTCHours(18, 0, 0, 0);
+
+  const votingEndTime = new Date(nominationEndTime);
+  votingEndTime.setUTCDate(votingEndTime.getUTCDate() + 1);
+
+  const roundId = cryptoModule.randomUUID();
+  const newRound = new Round({
+    id: roundId,
+    nominationStartTime: new Date(),
+    nominationEndTime,
+    votingStartTime: nominationEndTime,
+    votingEndTime,
+    createdAt: new Date(),
+    status: "nominating",
+    winner: null,
+  });
+
+  try {
+    await newRound.save();
+
+    res.status(200).send(newRound);
+  } catch (e) {
+    // eslint-disable-next-line no-undef
+    console.error(e);
+
+    throw e;
+  }
 });
 
 app.get("/nominations", (req, res) => {
@@ -154,6 +202,24 @@ app.get("/nominations", (req, res) => {
           },
         },
       },
+      {
+        $group: {
+          _id: "$castId",
+          document: { $first: "$$ROOT" },
+          totalVotes: { $sum: "$votesCount" },
+          weight: { $sum: "$weight" },
+        },
+      },
+      {
+        $replaceRoot: {
+          newRoot: {
+            $mergeObjects: [
+              "$document",
+              { votesCount: "$totalVotes", weight: "$weight" },
+            ],
+          },
+        },
+      },
     ],
   ])
     .sort({
@@ -182,6 +248,7 @@ app.get("/history", async (req, res) => {
 app.get("/current-period", async (req, res) => {
   try {
     const now = new Date();
+
     const rounds = await Round.find({
       $or: [
         {
@@ -200,7 +267,7 @@ app.get("/current-period", async (req, res) => {
         period = "voting";
       }
       return {
-        roundId: round.roundId,
+        roundId: round.id,
         period,
         status: round.status,
       };
