@@ -39,8 +39,12 @@ async function createNewRound() {
   votingEndTime.setUTCDate(votingEndTime.getUTCDate() + 1);
 
   const roundId = cryptoModule.randomUUID();
+  const lastRound = await Round.findOne().sort({ roundNumber: -1 });
+  const newRoundNumber = lastRound ? lastRound.roundNumber + 1 : 1;
+
   const newRound = new Round({
     id: roundId,
+    roundNumber: newRoundNumber,
     nominationStartTime: new Date(),
     nominationEndTime,
     votingStartTime: nominationEndTime,
@@ -51,6 +55,7 @@ async function createNewRound() {
   });
 
   try {
+    await newRound.validate();
     await newRound.save();
 
     return newRound;
