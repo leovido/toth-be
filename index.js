@@ -169,6 +169,60 @@ app.post("/rounds", async (req, res) => {
   }
 });
 
+// Fetches nominations by round. Useful for voting per round
+app.get("/nominationsByRound", (req, res) => {
+  const roundId = req.query.roundId;
+
+  Nomination.aggregate([
+    [
+      {
+        $match: {
+          roundId: roundId,
+        },
+      },
+      {
+        $lookup: {
+          from: "votes",
+          localField: "id",
+          foreignField: "nominationId",
+          as: "votes",
+        },
+      },
+      {
+        $addFields: {
+          votesCount: {
+            $size: "$votes",
+          },
+        },
+      },
+      {
+        $group: {
+          _id: "$castId",
+          document: { $first: "$$ROOT" },
+          totalVotes: { $sum: "$votesCount" },
+          weight: { $sum: "$weight" },
+        },
+      },
+      {
+        $replaceRoot: {
+          newRoot: {
+            $mergeObjects: [
+              "$document",
+              { votesCount: "$totalVotes", weight: "$weight" },
+            ],
+          },
+        },
+      },
+    ],
+  ])
+    .sort({
+      weight: -1,
+    })
+    .limit(5)
+    .then((nominations) => res.status(200).send(nominations))
+    .catch((err) => res.status(500).send(err));
+});
+
 // Fetches the current nominations for TODAY
 app.get("/nominations", (req, res) => {
   const startToday = new Date();
