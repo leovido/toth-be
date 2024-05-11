@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 const roundSchema = new mongoose.Schema({
-  roundId: String,
+  id: String,
   nominationStartTime: Date,
   nominationEndTime: Date,
   votingStartTime: Date,

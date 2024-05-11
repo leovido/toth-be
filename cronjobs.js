@@ -1,32 +1,64 @@
 const cron = require("node-cron");
-const mongoose = require("mongoose");
 const Round = require("./schemas/round");
+const cryptoModule = require("crypto");
 
 // Function to update rounds
 async function updateRounds() {
   const now = new Date();
-  console.log("Checking and updating round statuses");
 
   try {
     const rounds = await Round.find({
       $or: [
-        { status: "active", nominationEndTime: { $lte: now } },
+        { status: "nominating", nominationEndTime: { $lte: now } },
         { status: "voting", votingEndTime: { $lte: now } },
       ],
     });
 
-    rounds.forEach(async (round) => {
-      if (round.status === "active" && now >= round.nominationEndTime) {
+    for (const round of rounds) {
+      if (round.status === "nominating" && now >= round.nominationEndTime) {
         round.status = "voting";
-        round.votingStartTime = now;
+        round.votingStartTime = now; // Assuming this needs to be set here
       } else if (round.status === "voting" && now >= round.votingEndTime) {
         round.status = "completed";
-        round.winner = calculateWinner(round);
+        round.winner = calculateWinner(round); // Ensure this function handles asynchronous operations if needed
       }
+
       await round.save();
-    });
+    }
   } catch (error) {
     console.error("Error updating rounds:", error);
+    // Consider re-throwing or handling specific errors further here
+  }
+}
+
+async function createNewRound() {
+  const nominationEndTime = new Date();
+  nominationEndTime.setUTCHours(18, 0, 0, 0);
+
+  const votingEndTime = new Date(nominationEndTime);
+  votingEndTime.setUTCDate(votingEndTime.getUTCDate() + 1);
+
+  const roundId = cryptoModule.randomUUID();
+  const newRound = new Round({
+    id: roundId,
+    nominationStartTime: new Date(),
+    nominationEndTime,
+    votingStartTime: nominationEndTime,
+    votingEndTime,
+    createdAt: new Date(),
+    status: "nominating",
+    winner: null,
+  });
+
+  try {
+    await newRound.save();
+
+    return newRound;
+  } catch (e) {
+    // eslint-disable-next-line no-undef
+    console.error(e);
+
+    throw e;
   }
 }
 
@@ -36,16 +68,17 @@ function calculateWinner(round) {
 }
 
 // Export the cron job setup function
-function setupCronJobs() {
+async function setupCronJobs() {
   cron.schedule("0 0 * * *", async () => {
     console.log("Updating rounds: 12 AM UTC");
     await updateRounds();
+    await createNewRound();
   });
 
-  cron.schedule("0 18 * * *", async () => {
-    console.log("Updating rounds: 6 PM UTC");
-    await updateRounds();
-  });
+  // cron.schedule("0 18 * * *", async () => {
+  console.log("Updating rounds: 6 PM UTC");
+  await updateRounds();
+  // });
 }
 
 module.exports = { setupCronJobs };

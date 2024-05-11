@@ -5,6 +5,7 @@ const path = require("path");
 const Nomination = require("./schemas/nomination");
 const Vote = require("./schemas/vote");
 const Round = require("./schemas/round");
+const { setupCronJobs } = require("./cronjobs");
 
 require("dotenv").config({ path: path.resolve(__dirname, "./.env") });
 
@@ -16,10 +17,13 @@ const port = process.env.PORT || 3011;
 app.use(bodyParser.json());
 
 // MongoDB connection
-mongoose.connect(process.env.DB_INSTANCE, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
+mongoose
+  .connect(process.env.DB_INSTANCE, {
+    useNewUrlParser: true,
+  })
+  .then(() => {
+    setupCronJobs();
+  });
 
 const db = mongoose.connection;
 db.on("error", console.error.bind(console, "connection error:"));
@@ -102,6 +106,12 @@ app.post("/votes", async (req, res) => {
 
 app.get("/votes", (req, res) => {
   Vote.find()
+    .then((votes) => res.status(200).send(votes))
+    .catch((err) => res.status(500).send(err));
+});
+
+app.get("/rounds", (req, res) => {
+  Round.find()
     .then((votes) => res.status(200).send(votes))
     .catch((err) => res.status(500).send(err));
 });
