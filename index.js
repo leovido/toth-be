@@ -259,21 +259,7 @@ app.get("/current-period", async (req, res) => {
       ],
     });
 
-    const currentPeriods = rounds.map((round) => {
-      let period = "inactive";
-      if (now >= round.nominationStartTime && now <= round.nominationEndTime) {
-        period = "nomination";
-      } else if (now >= round.votingStartTime && now <= round.votingEndTime) {
-        period = "voting";
-      }
-      return {
-        roundId: round.id,
-        period,
-        status: round.status,
-      };
-    });
-
-    res.json(currentPeriods);
+    res.json(rounds);
   } catch (error) {
     console.error("Failed to determine current periods", error);
     res.status(500).send("Internal Server Error");
