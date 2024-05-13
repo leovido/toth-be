@@ -122,7 +122,9 @@ app.post("/votes", async (req, res) => {
 });
 
 app.get("/votes", (req, res) => {
-  Vote.find()
+  Vote.find({
+    roundId: req.query.roundId,
+  })
     .then((votes) => res.status(200).send(votes))
     .catch((err) => res.status(500).send(err));
 });
