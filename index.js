@@ -217,6 +217,7 @@ app.get("/nominationsByRound", (req, res) => {
   ])
     .sort({
       weight: -1,
+      username: -1,
     })
     .limit(5)
     .then((nominations) => res.status(200).send(nominations))
