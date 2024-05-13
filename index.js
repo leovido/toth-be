@@ -219,14 +219,66 @@ app.get("/nominationsByRound", (req, res) => {
   ])
     .sort({
       weight: -1,
-      username: -1,
+      createdAt: 1,
     })
     .limit(5)
     .then((nominations) => res.status(200).send(nominations))
     .catch((err) => res.status(500).send(err));
 });
 
-// Fetches the current nominations for TODAY
+app.get("/nominationsById", (req, res) => {
+  const id = req.query.id;
+
+  Nomination.aggregate([
+    [
+      {
+        $match: {
+          id: {
+            $eq: id,
+          },
+        },
+      },
+      {
+        $lookup: {
+          from: "votes",
+          localField: "id",
+          foreignField: "nominationId",
+          as: "votes",
+        },
+      },
+      {
+        $addFields: {
+          votesCount: {
+            $size: "$votes",
+          },
+        },
+      },
+      {
+        $group: {
+          _id: "$castId",
+          document: { $first: "$$ROOT" },
+          totalVotes: { $sum: "$votesCount" },
+          weight: { $sum: "$weight" },
+        },
+      },
+      {
+        $replaceRoot: {
+          newRoot: {
+            $mergeObjects: [
+              "$document",
+              { votesCount: "$totalVotes", weight: "$weight" },
+            ],
+          },
+        },
+      },
+    ],
+  ])
+    .limit(1)
+    .then((nominations) => res.status(200).send(nominations))
+    .catch((err) => res.status(500).send(err));
+});
+
+// Fetches the current nominations for TODAY by FID
 app.get("/nominationsByFid", (req, res) => {
   const startToday = new Date();
   startToday.setUTCHours(0, 0, 0, 0);
