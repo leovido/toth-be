@@ -80,10 +80,10 @@ async function setupCronJobs() {
     await createNewRound();
   });
 
-  // cron.schedule("0 18 * * *", async () => {
-  console.log("Updating rounds: 6 PM UTC");
-  await updateRounds();
-  // });
+  cron.schedule("0 18 * * *", async () => {
+    console.log("Updating rounds: 6 PM UTC");
+    await updateRounds();
+  });
 }
 
 module.exports = { setupCronJobs };
