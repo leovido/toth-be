@@ -5,6 +5,8 @@ const path = require("path");
 const Nomination = require("./schemas/nomination");
 const Vote = require("./schemas/vote");
 const Round = require("./schemas/round");
+const Signer = require("./schemas/signer");
+
 const { setupCronJobs } = require("./cronjobs");
 const cryptoModule = require("crypto");
 
@@ -83,8 +85,17 @@ app.post("/nominations", async (req, res) => {
 app.post("/signers", async (req, res) => {
   try {
     console.warn(req.body, "here");
+    const isValid = await Signer.validate(req.body);
+
+    if (isValid) {
+      const newItem = new Signer(req.body);
+      const item = await newItem.save();
+      res.status(201).send(item);
+    } else {
+      res.status(400).send("Invalid signer");
+    }
   } catch (e) {
-    return res.status(400).send({ error: `${e}` });
+    return res.status(400).send({ error: `signer error ${e}` });
   }
 });
 
