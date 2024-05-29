@@ -82,9 +82,16 @@ app.post("/nominations", async (req, res) => {
   }
 });
 
+app.get("/signers", async (req, res) => {
+  const signer = await Signer.findOne({
+    fid: { $eq: req.query.fid },
+  });
+
+  res.status(200).send(signer);
+});
+
 app.post("/signers", async (req, res) => {
   try {
-    console.warn(req.body, "here");
     const isValid = await Signer.validate(req.body);
 
     if (isValid) {
