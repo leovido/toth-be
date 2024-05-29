@@ -80,6 +80,14 @@ app.post("/nominations", async (req, res) => {
   }
 });
 
+app.post("/signers", async (req, res) => {
+  try {
+    console.warn(req.body, "here");
+  } catch (e) {
+    return res.status(400).send({ error: `${e}` });
+  }
+});
+
 app.post("/votes", async (req, res) => {
   try {
     const { roundId, fid } = req.body;
