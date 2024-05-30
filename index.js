@@ -87,7 +87,11 @@ app.get("/signers", async (req, res) => {
     fid: { $eq: req.query.fid },
   });
 
-  res.status(200).send(signer);
+  if (signer) {
+    res.status(200).send(signer);
+  } else {
+    res.status(204).json();
+  }
 });
 
 app.post("/signers", async (req, res) => {
