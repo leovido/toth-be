@@ -97,7 +97,7 @@ app.get("/signers", async (req, res) => {
 app.get("/history", async (req, res) => {
   const nominations = await Nomination.find({
     fid: { $eq: req.query.fid },
-  });
+  }).limit(5);
 
   res.status(200).send(nominations);
 });
