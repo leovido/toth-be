@@ -94,6 +94,14 @@ app.get("/signers", async (req, res) => {
   }
 });
 
+app.get("/history", async (req, res) => {
+  const nominations = await Nomination.find({
+    fid: { $eq: req.query.fid },
+  });
+
+  res.status(200).send(nominations);
+});
+
 app.post("/signers", async (req, res) => {
   try {
     const isValid = await Signer.validate(req.body);
