@@ -13,6 +13,10 @@ const SignerSchema = new mongoose.Schema({
     type: String,
     required: [true, "signer_uuid is required"],
   },
+  createdAt: {
+    type: Date,
+    required: [true, "createdAt is required"],
+  },
   public_key: {
     type: String,
     required: [true, "public_key is required"],
