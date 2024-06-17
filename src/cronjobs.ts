@@ -1,6 +1,6 @@
-const cron = require("node-cron");
-const Round = require("./schemas/round");
-const cryptoModule = require("crypto");
+import cron from "node-cron";
+import { Round } from "./schemas/round";
+import cryptoModule from "crypto";
 
 // Function to update rounds
 async function updateRounds() {
@@ -60,7 +60,6 @@ async function createNewRound() {
 
     return newRound;
   } catch (e) {
-    // eslint-disable-next-line no-undef
     console.error(e);
 
     throw e;

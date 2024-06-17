@@ -20,7 +20,10 @@ export const fetchDegenTips = async (
 
     const degenJson = await degenResponse.json();
 
-    return degenJson;
+    return {
+      remainingAllowance: degenJson.remaining_allowance,
+      allowance: degenJson.allowance,
+    };
   } catch (error) {
     throw error;
   }

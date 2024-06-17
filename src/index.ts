@@ -1,17 +1,18 @@
-import express from "express";
-import mongoose from "mongoose";
 import bodyParser from "body-parser";
+import cryptoModule from "crypto";
+import dotenv from "dotenv";
+import express from "express";
+import mongoose, { PipelineStage } from "mongoose";
 import path from "path";
+
 import { Nomination } from "./schemas/nomination";
-import { Vote } from "./schemas/vote";
 import { Round } from "./schemas/round";
 import { Signer } from "./schemas/signer";
-
-import { setupCronJobs } from "./cronjobs";
-import cryptoModule from "crypto";
+import { Vote } from "./schemas/vote";
 import { fetchDegenTips } from "./degen/degenAPI";
+import { setupCronJobs } from "./cronjobs";
 
-require("dotenv").config({ path: path.resolve(__dirname, "../.env") });
+dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
 const app = express();
 
@@ -35,10 +36,7 @@ app.get("/degen-tips", async (req, res) => {
   try {
     const fid = Number(req.query.fid);
     const json = await fetchDegenTips(fid);
-    const {
-      remaining_allowance: remainingAllowance,
-      tip_allowance: allowance,
-    } = json[0];
+    const { remainingAllowance, allowance } = json;
 
     res.status(200).send({
       remainingAllowance,
@@ -217,7 +215,6 @@ app.post("/rounds", async (req, res) => {
 
     res.status(200).send(newRound);
   } catch (e) {
-    // eslint-disable-next-line no-undef
     console.error(e);
 
     throw e;
@@ -228,48 +225,48 @@ app.post("/rounds", async (req, res) => {
 app.get("/nominationsByRound", (req, res) => {
   const roundId = req.query.roundId;
 
-  Nomination.aggregate([
-    [
-      {
-        $match: {
-          roundId: roundId,
+  const pipeline: PipelineStage[] = [
+    {
+      $match: {
+        roundId: roundId,
+      },
+    },
+    {
+      $lookup: {
+        from: "votes",
+        localField: "id",
+        foreignField: "nominationId",
+        as: "votes",
+      },
+    },
+    {
+      $addFields: {
+        votesCount: {
+          $size: "$votes",
         },
       },
-      {
-        $lookup: {
-          from: "votes",
-          localField: "id",
-          foreignField: "nominationId",
-          as: "votes",
+    },
+    {
+      $group: {
+        _id: "$castId",
+        document: { $first: "$$ROOT" },
+        totalVotes: { $sum: "$votesCount" },
+        weight: { $sum: "$weight" },
+      },
+    },
+    {
+      $replaceRoot: {
+        newRoot: {
+          $mergeObjects: [
+            "$document",
+            { votesCount: "$totalVotes", weight: "$weight" },
+          ],
         },
       },
-      {
-        $addFields: {
-          votesCount: {
-            $size: "$votes",
-          },
-        },
-      },
-      {
-        $group: {
-          _id: "$castId",
-          document: { $first: "$$ROOT" },
-          totalVotes: { $sum: "$votesCount" },
-          weight: { $sum: "$weight" },
-        },
-      },
-      {
-        $replaceRoot: {
-          newRoot: {
-            $mergeObjects: [
-              "$document",
-              { votesCount: "$totalVotes", weight: "$weight" },
-            ],
-          },
-        },
-      },
-    ],
-  ])
+    },
+  ];
+
+  Nomination.aggregate(pipeline)
     .sort({
       weight: -1,
       createdAt: 1,
@@ -282,50 +279,50 @@ app.get("/nominationsByRound", (req, res) => {
 app.get("/nominationsById", (req, res) => {
   const id = req.query.id;
 
-  Nomination.aggregate([
-    [
-      {
-        $match: {
-          id: {
-            $eq: id,
-          },
+  const pipeline: PipelineStage[] = [
+    {
+      $match: {
+        id: {
+          $eq: id,
         },
       },
-      {
-        $lookup: {
-          from: "votes",
-          localField: "id",
-          foreignField: "nominationId",
-          as: "votes",
+    },
+    {
+      $lookup: {
+        from: "votes",
+        localField: "id",
+        foreignField: "nominationId",
+        as: "votes",
+      },
+    },
+    {
+      $addFields: {
+        votesCount: {
+          $size: "$votes",
         },
       },
-      {
-        $addFields: {
-          votesCount: {
-            $size: "$votes",
-          },
+    },
+    {
+      $group: {
+        _id: "$castId",
+        document: { $first: "$$ROOT" },
+        totalVotes: { $sum: "$votesCount" },
+        weight: { $sum: "$weight" },
+      },
+    },
+    {
+      $replaceRoot: {
+        newRoot: {
+          $mergeObjects: [
+            "$document",
+            { votesCount: "$totalVotes", weight: "$weight" },
+          ],
         },
       },
-      {
-        $group: {
-          _id: "$castId",
-          document: { $first: "$$ROOT" },
-          totalVotes: { $sum: "$votesCount" },
-          weight: { $sum: "$weight" },
-        },
-      },
-      {
-        $replaceRoot: {
-          newRoot: {
-            $mergeObjects: [
-              "$document",
-              { votesCount: "$totalVotes", weight: "$weight" },
-            ],
-          },
-        },
-      },
-    ],
-  ])
+    },
+  ];
+
+  Nomination.aggregate(pipeline)
     .limit(1)
     .then((nominations: unknown) => res.status(200).send(nominations))
     .catch((err: unknown) => res.status(500).send(err));
@@ -341,54 +338,54 @@ app.get("/nominationsByFid", (req, res) => {
 
   const fid = Number(req.query.fid);
 
-  Nomination.aggregate([
-    [
-      {
-        $match: {
-          createdAt: {
-            $gte: startToday,
-            $lte: endToday,
-          },
-          fid: {
-            $eq: fid,
-          },
+  const pipeline: PipelineStage[] = [
+    {
+      $match: {
+        createdAt: {
+          $gte: startToday,
+          $lte: endToday,
+        },
+        fid: {
+          $eq: fid,
         },
       },
-      {
-        $lookup: {
-          from: "votes",
-          localField: "id",
-          foreignField: "nominationId",
-          as: "votes",
+    },
+    {
+      $lookup: {
+        from: "votes",
+        localField: "id",
+        foreignField: "nominationId",
+        as: "votes",
+      },
+    },
+    {
+      $addFields: {
+        votesCount: {
+          $size: "$votes",
         },
       },
-      {
-        $addFields: {
-          votesCount: {
-            $size: "$votes",
-          },
+    },
+    {
+      $group: {
+        _id: "$castId",
+        document: { $first: "$$ROOT" },
+        totalVotes: { $sum: "$votesCount" },
+        weight: { $sum: "$weight" },
+      },
+    },
+    {
+      $replaceRoot: {
+        newRoot: {
+          $mergeObjects: [
+            "$document",
+            { votesCount: "$totalVotes", weight: "$weight" },
+          ],
         },
       },
-      {
-        $group: {
-          _id: "$castId",
-          document: { $first: "$$ROOT" },
-          totalVotes: { $sum: "$votesCount" },
-          weight: { $sum: "$weight" },
-        },
-      },
-      {
-        $replaceRoot: {
-          newRoot: {
-            $mergeObjects: [
-              "$document",
-              { votesCount: "$totalVotes", weight: "$weight" },
-            ],
-          },
-        },
-      },
-    ],
-  ])
+    },
+  ];
+
+  Nomination.aggregate(pipeline)
     .sort({
       weight: -1,
     })
@@ -411,51 +408,51 @@ app.get("/nominations", (req, res) => {
   endToday.setUTCSeconds(0);
   endToday.setUTCMilliseconds(0);
 
-  Nomination.aggregate([
-    [
-      {
-        $match: {
-          createdAt: {
-            $gte: startToday,
-            $lte: endToday,
-          },
+  const pipeline: PipelineStage[] = [
+    {
+      $match: {
+        createdAt: {
+          $gte: startToday,
+          $lte: endToday,
         },
       },
-      {
-        $lookup: {
-          from: "votes",
-          localField: "id",
-          foreignField: "nominationId",
-          as: "votes",
+    },
+    {
+      $lookup: {
+        from: "votes",
+        localField: "id",
+        foreignField: "nominationId",
+        as: "votes",
+      },
+    },
+    {
+      $addFields: {
+        votesCount: {
+          $size: "$votes",
         },
       },
-      {
-        $addFields: {
-          votesCount: {
-            $size: "$votes",
-          },
+    },
+    {
+      $group: {
+        _id: "$castId",
+        document: { $first: "$$ROOT" },
+        totalVotes: { $sum: "$votesCount" },
+        weight: { $sum: "$weight" },
+      },
+    },
+    {
+      $replaceRoot: {
+        newRoot: {
+          $mergeObjects: [
+            "$document",
+            { votesCount: "$totalVotes", weight: "$weight" },
+          ],
         },
       },
-      {
-        $group: {
-          _id: "$castId",
-          document: { $first: "$$ROOT" },
-          totalVotes: { $sum: "$votesCount" },
-          weight: { $sum: "$weight" },
-        },
-      },
-      {
-        $replaceRoot: {
-          newRoot: {
-            $mergeObjects: [
-              "$document",
-              { votesCount: "$totalVotes", weight: "$weight" },
-            ],
-          },
-        },
-      },
-    ],
-  ])
+    },
+  ];
+
+  Nomination.aggregate(pipeline)
     .sort({
       weight: -1,
     })
