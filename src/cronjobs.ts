@@ -67,13 +67,14 @@ async function createNewRound() {
   }
 }
 
-function calculateWinner(round) {
+function calculateWinner(round: string) {
+  console.log(round, "round winner");
   // Add logic to determine the winner of the round
   return null;
 }
 
 // Export the cron job setup function
-async function setupCronJobs() {
+export const setupCronJobs = async () => {
   cron.schedule("0 0 * * *", async () => {
     console.log("Updating rounds: 12 AM UTC");
     await updateRounds();
@@ -84,6 +85,4 @@ async function setupCronJobs() {
     console.log("Updating rounds: 6 PM UTC");
     await updateRounds();
   });
-}
-
-module.exports = { setupCronJobs };
+};

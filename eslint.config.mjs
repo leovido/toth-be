@@ -1,8 +1,8 @@
 // eslint.config.js
-import js from "@eslint/js";
+import ts from "@eslint/ts";
 
 export default [
-  js.configs.recommended,
+  ts.configs.recommended,
 
   {
     rules: {

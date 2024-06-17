@@ -31,6 +31,4 @@ const SignerSchema = new mongoose.Schema({
   },
 });
 
-const Signer = mongoose.model("Signer", SignerSchema);
-
-module.exports = Signer;
+export const Signer = mongoose.model("Signer", SignerSchema);

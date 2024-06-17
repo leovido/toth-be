@@ -1,16 +1,17 @@
-const express = require("express");
-const mongoose = require("mongoose");
-const bodyParser = require("body-parser");
-const path = require("path");
-const Nomination = require("./schemas/nomination");
-const Vote = require("./schemas/vote");
-const Round = require("./schemas/round");
-const Signer = require("./schemas/signer");
+import express from "express";
+import mongoose from "mongoose";
+import bodyParser from "body-parser";
+import path from "path";
+import { Nomination } from "./schemas/nomination";
+import { Vote } from "./schemas/vote";
+import { Round } from "./schemas/round";
+import { Signer } from "./schemas/signer";
 
-const { setupCronJobs } = require("./cronjobs");
-const cryptoModule = require("crypto");
+import { setupCronJobs } from "./cronjobs";
+import cryptoModule from "crypto";
+import { fetchDegenTips } from "./degen/degenAPI";
 
-require("dotenv").config({ path: path.resolve(__dirname, "./.env") });
+require("dotenv").config({ path: path.resolve(__dirname, "../.env") });
 
 const app = express();
 
@@ -20,18 +21,32 @@ const port = process.env.PORT || 3011;
 app.use(bodyParser.json());
 
 // MongoDB connection
-mongoose
-  .connect(process.env.DB_INSTANCE, {
-    useNewUrlParser: true,
-  })
-  .then(() => {
-    setupCronJobs();
-  });
+mongoose.connect(process.env.DB_INSTANCE ?? "").then(() => {
+  setupCronJobs();
+});
 
 const db = mongoose.connection;
 db.on("error", console.error.bind(console, "connection error:"));
 db.once("open", function () {
   console.log("Connected successfully to MongoDB");
+});
+
+app.get("/degen-tips", async (req, res) => {
+  try {
+    const fid = Number(req.query.fid);
+    const json = await fetchDegenTips(fid);
+    const {
+      remaining_allowance: remainingAllowance,
+      tip_allowance: allowance,
+    } = json[0];
+
+    res.status(200).send({
+      remainingAllowance,
+      allowance,
+    });
+  } catch (error) {
+    res.status(500).send(error);
+  }
 });
 
 app.post("/nominations", async (req, res) => {
@@ -141,7 +156,7 @@ app.post("/votes", async (req, res) => {
         },
       },
     ])
-      .then((votes) => {
+      .then((votes: unknown[]) => {
         if (votes.length > 0) {
           return res.status(400).send({ error: "You already voted" });
         } else {
@@ -149,11 +164,11 @@ app.post("/votes", async (req, res) => {
           newItem.validateSync();
           newItem
             .save()
-            .then((item) => res.status(201).send(item))
-            .catch((err) => res.status(400).send(err));
+            .then((item: unknown) => res.status(201).send(item))
+            .catch((err: unknown) => res.status(400).send(err));
         }
       })
-      .catch((err) => res.status(500).send(err));
+      .catch((err: unknown) => res.status(500).send(err));
   } catch (e) {
     return res.status(400).send({ error: `${e}` });
   }
@@ -163,14 +178,14 @@ app.get("/votes", (req, res) => {
   Vote.find({
     roundId: req.query.roundId,
   })
-    .then((votes) => res.status(200).send(votes))
-    .catch((err) => res.status(500).send(err));
+    .then((votes: unknown) => res.status(200).send(votes))
+    .catch((err: unknown) => res.status(500).send(err));
 });
 
 app.get("/rounds", (req, res) => {
   Round.find()
-    .then((votes) => res.status(200).send(votes))
-    .catch((err) => res.status(500).send(err));
+    .then((votes: unknown) => res.status(200).send(votes))
+    .catch((err: unknown) => res.status(500).send(err));
 });
 
 app.post("/rounds", async (req, res) => {
@@ -260,8 +275,8 @@ app.get("/nominationsByRound", (req, res) => {
       createdAt: 1,
     })
     .limit(5)
-    .then((nominations) => res.status(200).send(nominations))
-    .catch((err) => res.status(500).send(err));
+    .then((nominations: unknown) => res.status(200).send(nominations))
+    .catch((err: unknown) => res.status(500).send(err));
 });
 
 app.get("/nominationsById", (req, res) => {
@@ -312,8 +327,8 @@ app.get("/nominationsById", (req, res) => {
     ],
   ])
     .limit(1)
-    .then((nominations) => res.status(200).send(nominations))
-    .catch((err) => res.status(500).send(err));
+    .then((nominations: unknown) => res.status(200).send(nominations))
+    .catch((err: unknown) => res.status(500).send(err));
 });
 
 // Fetches the current nominations for TODAY by FID
@@ -378,8 +393,8 @@ app.get("/nominationsByFid", (req, res) => {
       weight: -1,
     })
     .limit(1)
-    .then((nominations) => res.status(200).send(nominations))
-    .catch((err) => res.status(500).send(err));
+    .then((nominations: unknown) => res.status(200).send(nominations))
+    .catch((err: unknown) => res.status(500).send(err));
 });
 
 // Fetches the current nominations for TODAY
@@ -445,8 +460,8 @@ app.get("/nominations", (req, res) => {
       weight: -1,
     })
     .limit(5)
-    .then((nominations) => res.status(200).send(nominations))
-    .catch((err) => res.status(500).send(err));
+    .then((nominations: unknown) => res.status(200).send(nominations))
+    .catch((err: unknown) => res.status(500).send(err));
 });
 
 app.get("/history", async (req, res) => {

@@ -35,6 +35,4 @@ const NominationSchema = new mongoose.Schema({
   },
 });
 
-const Nomination = mongoose.model("Nomination", NominationSchema);
-
-module.exports = Nomination;
+export const Nomination = mongoose.model("Nomination", NominationSchema);
