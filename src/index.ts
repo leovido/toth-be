@@ -78,15 +78,11 @@ app.post("/nominations", async (req, res) => {
     ]);
 
     if (matches.length === 0) {
-      const isValid = await Nomination.validate(req.body);
+      await Nomination.validate(req.body);
 
-      if (isValid) {
-        const newItem = new Nomination(req.body);
-        const item = await newItem.save();
-        res.status(201).send(item);
-      } else {
-        res.status(400).send("Invalid nomination");
-      }
+      const newItem = new Nomination(req.body);
+      const item = await newItem.save();
+      res.status(201).send(item);
     } else {
       res.status(200).send("Already nominated");
     }
@@ -117,15 +113,11 @@ app.get("/history", async (req, res) => {
 
 app.post("/signers", async (req, res) => {
   try {
-    const isValid = await Signer.validate(req.body);
+    await Signer.validate(req.body);
 
-    if (isValid) {
-      const newItem = new Signer(req.body);
-      const item = await newItem.save();
-      res.status(201).send(item);
-    } else {
-      res.status(400).send("Invalid signer");
-    }
+    const newItem = new Signer(req.body);
+    const item = await newItem.save();
+    res.status(201).send(item);
   } catch (e) {
     return res.status(400).send({ error: `signer error ${e}` });
   }
@@ -134,9 +126,13 @@ app.post("/signers", async (req, res) => {
 app.post("/votes", async (req, res) => {
   try {
     const { roundId, fid } = req.body;
-    const round = await Round.find({
+    const round = await Round.findOne({
       id: roundId,
     });
+
+    if (round === null) {
+      return res.status(400).send({ error: "Round not found" });
+    }
 
     const now = new Date();
     if (now < round.votingStartTime || now > round.votingEndTime) {

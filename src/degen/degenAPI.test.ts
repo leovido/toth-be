@@ -8,7 +8,7 @@ jest.mock("node-fetch", () => jest.fn());
 
 describe("fetchDegenTips", () => {
   it("should fetch tip allowance from degen.tips API", async () => {
-    const fid = Math.random();
+    const fid = 1;
     const mockResponse = {
       allowance: "1000",
       remaining_allowance: "434",
@@ -30,7 +30,10 @@ describe("fetchDegenTips", () => {
         },
       }
     );
-    expect(response).toEqual(mockResponse);
+    expect(response.allowance).toEqual(mockResponse.allowance);
+    expect(response.remainingAllowance).toEqual(
+      mockResponse.remaining_allowance
+    );
   });
 
   it("should throw an error if the response is not ok", async () => {
@@ -42,7 +45,7 @@ describe("fetchDegenTips", () => {
       json: () => Promise.resolve({}),
     };
 
-    mockedFetch.mockResolvedValueOnce(mockResponse as any);
+    mockedFetch.mockResolvedValueOnce(mockResponse as unknown as Response);
 
     await expect(fetchDegenTips(fid)).rejects.toThrow();
   });

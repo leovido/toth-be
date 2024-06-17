@@ -66,7 +66,7 @@ async function createNewRound() {
   }
 }
 
-function calculateWinner(round: string) {
+function calculateWinner(round: unknown) {
   console.log(round, "round winner");
   // Add logic to determine the winner of the round
   return null;

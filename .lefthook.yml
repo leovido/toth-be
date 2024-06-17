@@ -1,0 +1,10 @@
+pre-commit:
+  commands:
+    lint:
+      glob: "*.{ts,tsx,js,jsx}"
+      run: npx eslint ./src --fix
+
+pre-push:
+  commands:
+    test:
+      run: npm test
