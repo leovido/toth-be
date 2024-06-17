@@ -123,6 +123,25 @@ app.post("/signers", async (req, res) => {
   }
 });
 
+app.post("/updateSigner", async (req, res) => {
+  try {
+    const signer = await Signer.findOne({
+      fid: { $eq: req.body.fid },
+    });
+
+    const _updatedSigner = {
+      ...signer?.toJSON(),
+      status: req.body.status,
+    };
+
+    const updatedSigner = new Signer(_updatedSigner);
+    const item = await updatedSigner.updateOne(_updatedSigner);
+    res.status(201).send(item);
+  } catch (e) {
+    return res.status(400).send({ error: `signer error ${e}` });
+  }
+});
+
 app.post("/votes", async (req, res) => {
   try {
     const { roundId, fid } = req.body;
