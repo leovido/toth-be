@@ -3,7 +3,10 @@ import { randomUUID } from "crypto";
 
 export const client = new NeynarAPIClient(process.env.NEYNAR_API_KEY || "");
 
-export const retry = async (fn, retries = 3) => {
+export const retry = async (
+  fn: { (): Promise<void>; (): unknown },
+  retries = 3
+) => {
   for (let i = 0; i < retries; i++) {
     try {
       await fn();
@@ -14,7 +17,12 @@ export const retry = async (fn, retries = 3) => {
   }
 };
 
-export const postCast = async (signerUuid, text, replyTo, retries = 3) => {
+export const postCast = async (
+  signerUuid: string,
+  text: string,
+  replyTo: string,
+  retries: number = 3
+) => {
   const idem = randomUUID();
   await retry(async () => {
     await client.publishCast(signerUuid, text, {
