@@ -1,6 +1,6 @@
-const cron = require("node-cron");
-const Round = require("./schemas/round");
-const cryptoModule = require("crypto");
+import cron from "node-cron";
+import { Round } from "./schemas/round";
+import cryptoModule from "crypto";
 
 // Function to update rounds
 async function updateRounds() {
@@ -60,20 +60,20 @@ async function createNewRound() {
 
     return newRound;
   } catch (e) {
-    // eslint-disable-next-line no-undef
     console.error(e);
 
     throw e;
   }
 }
 
-function calculateWinner(round) {
+function calculateWinner(round: unknown) {
+  console.log(round, "round winner");
   // Add logic to determine the winner of the round
   return null;
 }
 
 // Export the cron job setup function
-async function setupCronJobs() {
+export const setupCronJobs = async () => {
   cron.schedule("0 0 * * *", async () => {
     console.log("Updating rounds: 12 AM UTC");
     await updateRounds();
@@ -84,6 +84,4 @@ async function setupCronJobs() {
     console.log("Updating rounds: 6 PM UTC");
     await updateRounds();
   });
-}
-
-module.exports = { setupCronJobs };
+};

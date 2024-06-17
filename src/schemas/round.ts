@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 const roundSchema = new mongoose.Schema({
   id: {
@@ -33,6 +33,4 @@ const roundSchema = new mongoose.Schema({
   winner: { type: mongoose.Schema.Types.ObjectId, ref: "Nomination" },
 });
 
-const Round = mongoose.model("Round", roundSchema);
-
-module.exports = Round;
+export const Round = mongoose.model("Round", roundSchema);

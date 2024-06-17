@@ -1,13 +1,9 @@
-// eslint.config.js
-import js from "@eslint/js";
+// @ts-check
 
-export default [
-  js.configs.recommended,
+import eslint from "@eslint/js";
+import tseslint from "typescript-eslint";
 
-  {
-    rules: {
-      "no-unused-vars": "warn",
-      "no-undef": "warn",
-    },
-  },
-];
+export default tseslint.config(
+  eslint.configs.recommended,
+  ...tseslint.configs.recommended
+);

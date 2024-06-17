@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 const VoteSchema = new mongoose.Schema({
   id: {
@@ -23,6 +23,4 @@ const VoteSchema = new mongoose.Schema({
   },
 });
 
-const Vote = mongoose.model("Vote", VoteSchema);
-
-module.exports = Vote;
+export const Vote = mongoose.model("Vote", VoteSchema);
