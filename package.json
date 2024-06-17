@@ -9,7 +9,8 @@
     "build": "tsc",
     "serve": "node dist/index.ts",
     "lint": "eslint . --ext .ts --fix",
-    "test": "npx jest"
+    "test": "npx jest",
+    "heroku-postbuild": "npm run build"
   },
   "keywords": [],
   "author": "",
