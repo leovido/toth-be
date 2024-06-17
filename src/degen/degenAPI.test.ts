@@ -1,25 +1,27 @@
-// import { fetchDegenTips } from "./degenAPI";
-// const { mocked } = require("ts-jest/utils");
-const fetchDegenTips = require("./degenAPI");
+import { fetchDegenTips } from "./degenAPI";
+import fetch, { Response } from "node-fetch";
 
-jest.mock("node-fetch");
+// Cast fetch to its actual type
+const mockedFetch = fetch as jest.MockedFunction<typeof fetch>;
+
+jest.mock("node-fetch", () => jest.fn());
 
 describe("fetchDegenTips", () => {
   it("should fetch tip allowance from degen.tips API", async () => {
-    const fid = 203666;
+    const fid = Math.random();
     const mockResponse = {
-      allowance: 1000,
-      currency: "ETH",
+      allowance: "1000",
+      remaining_allowance: "434",
     };
 
-    // mocked(fetch).mockResolvedValueOnce({
-    //   ok: true,
-    //   json: jest.fn().mockResolvedValueOnce(mockResponse),
-    // });
+    mockedFetch.mockResolvedValueOnce({
+      ok: true,
+      json: () => Promise.resolve(mockResponse),
+    } as Response);
 
     const response = await fetchDegenTips(fid);
 
-    expect(fetch).toHaveBeenCalledWith(
+    expect(mockedFetch).toHaveBeenCalledWith(
       `https://www.degen.tips/api/airdrop2/tip-allowance?fid=${fid}`,
       {
         method: "GET",
@@ -34,24 +36,14 @@ describe("fetchDegenTips", () => {
   it("should throw an error if the response is not ok", async () => {
     const fid = 203666;
 
-    // mocked(fetch).mockResolvedValueOnce({
-    //   ok: false,
-    // });
+    const mockResponse = {
+      ok: false,
+      status: 500,
+      json: () => Promise.resolve({}),
+    };
 
-    await expect(fetchDegenTips(fid)).rejects.toThrow(
-      "Failed to fetch data from degen.tips"
-    );
-  });
+    mockedFetch.mockResolvedValueOnce(mockResponse as any);
 
-  it("should return the error object if an error occurs", async () => {
-    const fid = 203666;
-    const errorMessage = "Network error";
-
-    // mocked(fetch).mockRejectedValueOnce(new Error(errorMessage));
-
-    const response = await fetchDegenTips(fid);
-
-    expect(response).toBeInstanceOf(Error);
-    expect(response.message).toBe(errorMessage);
+    await expect(fetchDegenTips(fid)).rejects.toThrow();
   });
 });

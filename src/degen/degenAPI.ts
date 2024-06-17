@@ -1,4 +1,8 @@
-export const fetchDegenTips = async (fid: number) => {
+import fetch from "node-fetch";
+
+export const fetchDegenTips = async (
+  fid: number
+): Promise<{ remainingAllowance: string; allowance: string }> => {
   try {
     const degenResponse = await fetch(
       `https://www.degen.tips/api/airdrop2/tip-allowance?fid=${fid}`,
@@ -18,6 +22,6 @@ export const fetchDegenTips = async (fid: number) => {
 
     return degenJson;
   } catch (error) {
-    return error;
+    throw error;
   }
 };
