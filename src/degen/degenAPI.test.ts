@@ -10,7 +10,7 @@ describe("fetchDegenTips", () => {
   it("should fetch tip allowance from degen.tips API", async () => {
     const fid = 1;
     const mockResponse = {
-      allowance: "1000",
+      tip_allowance: "1000",
       remaining_allowance: "434",
     };
 
@@ -22,7 +22,7 @@ describe("fetchDegenTips", () => {
     const response = await fetchDegenTips(fid);
 
     expect(mockedFetch).toHaveBeenCalledWith(
-      `https://www.degen.tips/api/airdrop2/tip-allowance?fid=${fid}`,
+      `https://www.degentip.me/api/get_allowance?fid=${fid}`,
       {
         method: "GET",
         headers: {
@@ -30,7 +30,7 @@ describe("fetchDegenTips", () => {
         },
       }
     );
-    expect(response.allowance).toEqual(mockResponse.allowance);
+    expect(response.allowance).toEqual(mockResponse.tip_allowance);
     expect(response.remainingAllowance).toEqual(
       mockResponse.remaining_allowance
     );

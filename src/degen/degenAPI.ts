@@ -4,7 +4,7 @@ export const fetchDegenTips = async (
   fid: number
 ): Promise<{ remainingAllowance: string; allowance: string }> => {
   const degenResponse = await fetch(
-    `https://www.degen.tips/api/airdrop2/tip-allowance?fid=${fid}`,
+    `https://www.degentip.me/api/get_allowance?fid=${fid}`,
     {
       method: "GET",
       headers: {
@@ -21,6 +21,6 @@ export const fetchDegenTips = async (
 
   return {
     remainingAllowance: degenJson.remaining_allowance,
-    allowance: degenJson.allowance,
+    allowance: degenJson.tip_allowance,
   };
 };
