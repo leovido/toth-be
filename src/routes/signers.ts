@@ -15,6 +15,14 @@ router.get("/signers", async (req, res) => {
   }
 });
 
+router.get("/approvedSigners", async (req, res) => {
+  const approvedSigners = await Signer.find({
+    status: { $eq: "approved" },
+  });
+
+  res.status(200).send(approvedSigners);
+});
+
 router.post("/signers", async (req, res) => {
   try {
     await Signer.validate(req.body);
