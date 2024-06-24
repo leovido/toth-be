@@ -2,6 +2,7 @@ import cron from "node-cron";
 import { postCastCannon } from "./neynar/client";
 import { Signer } from "@neynar/nodejs-sdk/build/neynar-api/v2";
 import { fetchDegenTips } from "./degen/degenAPI";
+import fetch from "node-fetch";
 
 async function fetchApprovedSigners(): Promise<Signer[]> {
   const endpoint = "http://localhost:3000/approvedSigners";
@@ -13,11 +14,11 @@ async function fetchApprovedSigners(): Promise<Signer[]> {
     return signers;
   } catch (error) {
     console.error("Error fetching approved signers:", error);
-    return [];
+    throw error;
   }
 }
 
-const fetchCastWinner = async () => {
+export const fetchCastWinner = async () => {
   const endpoint = `http://localhost:3000/latest-round`;
 
   try {
@@ -27,7 +28,7 @@ const fetchCastWinner = async () => {
     return castWinner.winner;
   } catch (error) {
     console.error("Error fetching cast winner:", error);
-    return [];
+    throw new Error(`Failed to fetch cast winner: ${error}`);
   }
 };
 
