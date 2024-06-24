@@ -20,7 +20,7 @@ async function updateRounds() {
         round.votingStartTime = now; // Assuming this needs to be set here
       } else if (round.status === "voting" && now >= round.votingEndTime) {
         round.status = "completed";
-        round.winner = calculateWinner(round); // Ensure this function handles asynchronous operations if needed
+        round.winner = await saveWinner(); // Ensure this function handles asynchronous operations if needed
       }
 
       await round.save();
@@ -66,11 +66,20 @@ async function createNewRound() {
   }
 }
 
-function calculateWinner(round: unknown) {
-  console.log(round, "round winner");
-  // Add logic to determine the winner of the round
-  return null;
-}
+export const saveWinner = async (): Promise<string> => {
+  const endpoint = `http://localhost:3000/nominations`;
+
+  try {
+    const response = await fetch(endpoint);
+    const json = await response.json();
+
+    const castWinner = json[0];
+    return castWinner;
+  } catch (error) {
+    console.error("Error fetching cast winner:", error);
+    throw error;
+  }
+};
 
 // Export the cron job setup function
 export const setupCronJobs = async () => {

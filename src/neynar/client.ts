@@ -17,7 +17,7 @@ export const retry = async (
   }
 };
 
-export const postCast = async (
+export const postCastCannon = async (
   signerUuid: string,
   text: string,
   replyTo: string,

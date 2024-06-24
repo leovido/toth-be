@@ -24,3 +24,28 @@ export const fetchDegenTips = async (
     allowance: degenJson.tip_allowance,
   };
 };
+
+export const tipDistribution = async (fid: number) => {
+  const tipAmount = await fetchDegenTips(fid);
+  const remainingAllowance = Number(tipAmount.remainingAllowance);
+
+  if (remainingAllowance < 1) {
+    throw new Error(
+      "Invalid tip distribution. You have no remaining allowance to distribute"
+    );
+  }
+
+  if (remainingAllowance < 7) {
+    throw new Error(
+      "Invalid tip distribution. Minimum is 7 $DEGEN remaining on your remaining allowance"
+    );
+  }
+
+  const tothCut = Math.floor(remainingAllowance * 0.15); // 15% to @tipothehat
+  const castWinnerEarnings = Math.floor(remainingAllowance * 0.85); // 85% to the cast winner
+
+  return {
+    tothCut,
+    castWinnerEarnings,
+  };
+};

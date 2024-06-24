@@ -30,7 +30,7 @@ const roundSchema = new mongoose.Schema({
     required: [true, "createdAt is required"],
   },
   status: String, // active, voting, completed
-  winner: { type: mongoose.Schema.Types.ObjectId, ref: "Nomination" },
+  winner: { type: mongoose.Schema.Types.String, ref: "Nomination" },
 });
 
 export const Round = mongoose.model("Round", roundSchema);

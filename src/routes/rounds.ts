@@ -10,7 +10,16 @@ router.get("/rounds", (req, res) => {
     .catch((err: unknown) => res.status(500).send(err));
 });
 
-router.post("/rounds", async (req, res) => {
+router.get("/latest-round", (_req, res) => {
+  Round.findOne({
+    status: "completed",
+  })
+    .sort({ createdAt: -1 })
+    .limit(1)
+    .then((round: unknown) => res.status(200).send(round));
+});
+
+router.post("/rounds", async (_req, res) => {
   const nominationEndTime = new Date();
   nominationEndTime.setUTCHours(18, 0, 0, 0);
 
