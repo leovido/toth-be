@@ -20,7 +20,7 @@ async function updateRounds() {
         round.votingStartTime = now; // Assuming this needs to be set here
       } else if (round.status === "voting" && now >= round.votingEndTime) {
         round.status = "completed";
-        round.winner = await saveWinner(); // Ensure this function handles asynchronous operations if needed
+        round.winner = await saveWinner();
       }
 
       await round.save();
@@ -67,14 +67,14 @@ async function createNewRound() {
 }
 
 export const saveWinner = async (): Promise<string> => {
-  const endpoint = `http://localhost:3000/nominations`;
+  const endpoint = `${process.env.PUBLIC_URL}/nominations`;
 
   try {
     const response = await fetch(endpoint);
     const json = await response.json();
 
     const castWinner = json[0];
-    return castWinner.id;
+    return `https://warpcast.com/${castWinner.username}/${castWinner.castId}`;
   } catch (error) {
     console.error("Error fetching cast winner:", error);
     throw error;

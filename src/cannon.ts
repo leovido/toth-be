@@ -5,7 +5,7 @@ import { fetchDegenTips } from "./degen/degenAPI";
 import fetch from "node-fetch";
 
 export const fetchApprovedSigners = async (): Promise<Signer[]> => {
-  const endpoint = "http://localhost:3000/approvedSigners";
+  const endpoint = `${process.env.PUBLIC_URL}/approvedSigners`;
 
   try {
     const response = await fetch(endpoint);
@@ -19,7 +19,7 @@ export const fetchApprovedSigners = async (): Promise<Signer[]> => {
 };
 
 export const fetchCastWinner = async (): Promise<string> => {
-  const endpoint = `http://localhost:3000/latest-round`;
+  const endpoint = `${process.env.PUBLIC_URL}/latest-round`;
 
   try {
     const response = await fetch(endpoint);
@@ -40,6 +40,7 @@ export const cannonCronJob = async () => {
 
 export const executeCannon = async () => {
   try {
+    console.warn("cannon fired");
     // 1. Fetch DEGEN remaining
     // 2. Fetch castWinner
     // 3. Fetch approved signers
@@ -51,7 +52,7 @@ export const executeCannon = async () => {
       const { remainingAllowance } = await fetchDegenTips(signer.fid || 0);
       await postCastCannon(
         signer.signer_uuid,
-        `${remainingAllowance} $DEGEN`,
+        `${remainingAllowance} DEGEN`,
         castWinner
       );
     });
