@@ -1,5 +1,7 @@
+// ts-ignore
 import bodyParser from "body-parser";
 import dotenv from "dotenv";
+// ts-ignore
 import express from "express";
 import mongoose from "mongoose";
 import path from "path";
