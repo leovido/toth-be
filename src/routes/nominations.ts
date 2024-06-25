@@ -281,7 +281,7 @@ router.get("/nominations", (req, res) => {
 
   Nomination.aggregate(pipeline)
     .sort({
-      weight: -1,
+      votesCount: -1,
     })
     .limit(5)
     .then((nominations: unknown) => res.status(200).send(nominations))

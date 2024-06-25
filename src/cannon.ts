@@ -4,7 +4,7 @@ import { Signer } from "@neynar/nodejs-sdk/build/neynar-api/v2";
 import { fetchDegenTips } from "./degen/degenAPI";
 import fetch from "node-fetch";
 
-async function fetchApprovedSigners(): Promise<Signer[]> {
+export const fetchApprovedSigners = async (): Promise<Signer[]> => {
   const endpoint = "http://localhost:3000/approvedSigners";
 
   try {
@@ -16,9 +16,9 @@ async function fetchApprovedSigners(): Promise<Signer[]> {
     console.error("Error fetching approved signers:", error);
     throw error;
   }
-}
+};
 
-export const fetchCastWinner = async () => {
+export const fetchCastWinner = async (): Promise<string> => {
   const endpoint = `http://localhost:3000/latest-round`;
 
   try {
@@ -33,8 +33,13 @@ export const fetchCastWinner = async () => {
 };
 
 export const cannonCronJob = async () => {
-  cron.schedule("0 0 * * *", async () => {
-    console.log("Firing cannon!");
+  cron.schedule("0 * * * *", async () => {
+    await executeCannon();
+  });
+};
+
+export const executeCannon = async () => {
+  try {
     // 1. Fetch DEGEN remaining
     // 2. Fetch castWinner
     // 3. Fetch approved signers
@@ -43,8 +48,15 @@ export const cannonCronJob = async () => {
     const approvedSigners = await fetchApprovedSigners();
 
     approvedSigners.forEach(async (signer) => {
-      const tipAmount = await fetchDegenTips(signer.fid || 0);
-      postCastCannon(signer.signer_uuid, `${tipAmount} $DEGEN`, castWinner);
+      const { remainingAllowance } = await fetchDegenTips(signer.fid || 0);
+      await postCastCannon(
+        signer.signer_uuid,
+        `${remainingAllowance} $DEGEN`,
+        castWinner
+      );
     });
-  });
+  } catch (error) {
+    console.error(error);
+    throw new Error(`Failed to execute cannon logic ${error}`);
+  }
 };

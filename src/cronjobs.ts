@@ -74,7 +74,7 @@ export const saveWinner = async (): Promise<string> => {
     const json = await response.json();
 
     const castWinner = json[0];
-    return castWinner;
+    return castWinner.id;
   } catch (error) {
     console.error("Error fetching cast winner:", error);
     throw error;
