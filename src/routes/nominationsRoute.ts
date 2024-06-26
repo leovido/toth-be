@@ -16,7 +16,7 @@ router.post("/nominations", async (req, res) => {
       {
         $match: {
           createdAt: { $gte: startToday, $lte: endToday },
-          fid: req.body.fid,
+          fid: 203666,
         },
       },
       {
@@ -33,7 +33,6 @@ router.post("/nominations", async (req, res) => {
         },
       },
     ]);
-
     if (matches.length === 0) {
       await Nomination.validate(req.body);
 

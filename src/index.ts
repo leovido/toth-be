@@ -19,6 +19,8 @@ dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
 const app = express();
 
+app.use(bodyParser.json());
+
 app.use(signersRoutes);
 app.use(roundRoutes);
 app.use(votesRoutes);
@@ -27,9 +29,6 @@ app.use(historyRoutes);
 app.use(helperRoutes);
 
 const port = process.env.PORT || 3011;
-
-// Body parser middleware
-app.use(bodyParser.json());
 
 // MongoDB connection
 mongoose.connect(process.env.DB_INSTANCE ?? "").then(() => {
