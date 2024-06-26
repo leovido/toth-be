@@ -6,12 +6,12 @@ import express from "express";
 import mongoose from "mongoose";
 import path from "path";
 
-import signersRoutes from "./routes/signers";
-import nominationsRoutes from "./routes/nominations";
-import votesRoutes from "./routes/votes";
-import roundRoutes from "./routes/rounds";
-import historyRoutes from "./routes/history";
-import helperRoutes from "./routes/helpers";
+import signersRoutes from "./routes/signersRoute";
+import nominationsRoutes from "./routes/nominationsRoute";
+import votesRoutes from "./routes/votesRoute";
+import roundRoutes from "./routes/roundsRoute";
+import historyRoutes from "./routes/historyRoute";
+import helperRoutes from "./routes/helpersRoute";
 
 import { setupCronJobs } from "./cronjobs";
 
