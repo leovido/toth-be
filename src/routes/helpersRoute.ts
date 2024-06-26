@@ -1,3 +1,4 @@
+// ts-ignore
 import express from "express";
 import { fetchDegenTips } from "../degen/degenAPI";
 import { Round } from "../schemas/round";

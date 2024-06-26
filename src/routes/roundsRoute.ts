@@ -1,3 +1,4 @@
+// ts-ignore
 import express from "express";
 import cryptoModule from "crypto";
 import { Round } from "../schemas/round";
