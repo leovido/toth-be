@@ -13,8 +13,10 @@ describe("fetchDegenTips", () => {
   it("should fetch tip allowance from degen.tips API", async () => {
     const fid = 1;
     const mockResponse = {
-      tip_allowance: "1000",
-      remaining_allowance: "434",
+      allowance: {
+        tip_allowance: "1000",
+        remaining_allowance: "434",
+      },
     };
 
     mockedFetch.mockResolvedValueOnce({
@@ -33,9 +35,9 @@ describe("fetchDegenTips", () => {
         },
       }
     );
-    expect(response.allowance).toEqual(mockResponse.tip_allowance);
+    expect(response.allowance).toEqual(mockResponse.allowance.tip_allowance);
     expect(response.remainingAllowance).toEqual(
-      mockResponse.remaining_allowance
+      mockResponse.allowance.remaining_allowance
     );
   });
 
@@ -62,17 +64,20 @@ describe("tipDistribution", () => {
   it("should calculate the correct tip distribution", async () => {
     const fid = 1;
     const mockResponse = {
-      tip_allowance: "1000",
-      remaining_allowance: "1000",
+      allowance: {
+        tip_allowance: "1000",
+        remaining_allowance: "1000",
+      },
     };
     mockedFetch.mockResolvedValueOnce({
       ok: true,
       json: () => Promise.resolve(mockResponse),
     } as Response);
 
-    const expectedTothCut = Number(mockResponse.remaining_allowance) * 0.15;
+    const expectedTothCut =
+      Number(mockResponse.allowance.remaining_allowance) * 0.15;
     const expectedCastWinnerEarnings =
-      Number(mockResponse.remaining_allowance) * 0.85;
+      Number(mockResponse.allowance.remaining_allowance) * 0.85;
 
     const result = await tipDistribution(fid);
 
@@ -83,8 +88,10 @@ describe("tipDistribution", () => {
   it("should handle remaining allowance < 0, throwing an error", async () => {
     const fid = 1;
     const mockResponse = {
-      tip_allowance: "1000",
-      remaining_allowance: "-1",
+      allowance: {
+        tip_allowance: "1000",
+        remaining_allowance: "-1",
+      },
     };
     mockedFetch.mockResolvedValueOnce({
       ok: true,
@@ -100,8 +107,10 @@ describe("tipDistribution", () => {
   it("should handle remaining allowance as 0, throwing an error", async () => {
     const fid = 1;
     const mockResponse = {
-      tip_allowance: "1000",
-      remaining_allowance: "0",
+      allowance: {
+        tip_allowance: "1000",
+        remaining_allowance: "0",
+      },
     };
     mockedFetch.mockResolvedValueOnce({
       ok: true,
@@ -117,8 +126,10 @@ describe("tipDistribution", () => {
   it("should not send any tips if below 7 $DEGEN", async () => {
     const fid = 1;
     const mockResponse = {
-      tip_allowance: "1000",
-      remaining_allowance: "1",
+      allowance: {
+        tip_allowance: "1000",
+        remaining_allowance: "1",
+      },
     };
     mockedFetch.mockResolvedValueOnce({
       ok: true,
