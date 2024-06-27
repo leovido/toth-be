@@ -33,6 +33,5 @@ export const postCastCannon = async (
       replyTo: replyTo,
       idem,
     });
-    console.warn("success");
   }, retries);
 };

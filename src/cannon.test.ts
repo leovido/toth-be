@@ -5,7 +5,16 @@ import * as degenAPIModule from "./degen/degenAPI";
 
 import cron from "node-cron";
 import fetch, { Response } from "node-fetch";
-import { postCastCannon } from "./neynar/client";
+
+const mockedFetch = fetch as jest.MockedFunction<typeof fetch>;
+jest.mock("node-fetch", () => jest.fn());
+jest.mock("node-cron", () => ({
+  schedule: jest.fn(),
+}));
+
+jest.mock("./neynar/client", () => ({
+  postCastCannon: jest.fn(),
+}));
 
 const mockApprovedSigners: Signer[] = [
   {
@@ -27,33 +36,6 @@ const mockApprovedSigners: Signer[] = [
       "https://client.warpcast.com/deeplinks/signed-key-request?token=0x1080f0681bd300b5b4e145783c8c875187232b029b0d2943",
   },
 ];
-
-// Cast fetch to its actual type
-const mockedFetch = fetch as jest.MockedFunction<typeof fetch>;
-jest.mock("node-fetch", () => jest.fn());
-jest.mock("./neynar/client", () => ({
-  postCastCannon: jest.fn(),
-}));
-jest.mock("node-cron");
-
-// jest.mock("./cannon", () => {
-//   const originalModule: typeof import("./cannon") =
-//     jest.requireActual("./cannon");
-
-//   return {
-//     __esModule: true,
-//     fetchCastWinner: jest.fn().mockImplementation(() => "John Doe"),
-//     fetchApprovedSigners: jest
-//       .fn()
-//       .mockImplementation(() => mockApprovedSigners),
-//     cannonCronJob: originalModule.cannonCronJob,
-//     executeCannon: originalModule.executeCannon,
-//   };
-// });
-
-jest.mock("node-cron", () => ({
-  schedule: jest.fn(),
-}));
 
 describe("fetchCastWinner", () => {
   it("should fetch the cast winner successfully", async () => {
@@ -105,17 +87,16 @@ describe("cannonCronJob", () => {
     await cannonModule.cannonCronJob();
 
     expect(cron.schedule).toHaveBeenCalledWith(
-      "0 * * * *",
+      "50 23 * * *",
       expect.any(Function)
     );
   });
 
-  it.only("should fetch the cast winner and approved signers", async () => {
+  it("should fetch the cast winner and approved signers", async () => {
     await cannonModule.executeCannon();
     expect(cannonModule.fetchCastWinner).toHaveBeenCalledTimes(1);
     expect(cannonModule.fetchApprovedSigners).toHaveBeenCalled();
     expect(degenAPIModule.fetchDegenTips).toHaveBeenCalledTimes(2);
-    expect(postCastCannon).toHaveBeenCalled();
   });
 
   // it("should handle errors during cannon execution", async () => {

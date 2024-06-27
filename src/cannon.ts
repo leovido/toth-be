@@ -1,7 +1,7 @@
 import cron from "node-cron";
 import { client, postCastCannon } from "./neynar/client";
 import { Signer } from "@neynar/nodejs-sdk/build/neynar-api/v2";
-import { fetchDegenTips } from "./degen/degenAPI";
+import { tipDistribution } from "./degen/degenAPI";
 import fetch from "node-fetch";
 
 export const fetchApprovedSigners = async (): Promise<Signer[]> => {
@@ -53,7 +53,7 @@ export const fetchCastWinner = async (): Promise<string> => {
 };
 
 export const cannonCronJob = async () => {
-  cron.schedule("0 * * * *", async () => {
+  cron.schedule("50 23 * * *", async () => {
     await executeCannon();
   });
 };
@@ -69,12 +69,20 @@ export const executeCannon = async () => {
     const allSigners = await fetchApprovedSigners();
 
     allSigners.forEach(async (signer) => {
-      const { remainingAllowance } = await fetchDegenTips(signer.fid || 0);
+      const { tothCut, castWinnerEarnings } = await tipDistribution(
+        signer.fid || 0
+      );
 
       await postCastCannon(
         signer.signer_uuid,
-        `Testing TOTH ${remainingAllowance} DEGEN`,
+        `Testing TOTH ${castWinnerEarnings} DEGEN`,
         castWinner
+      );
+
+      await postCastCannon(
+        signer.signer_uuid,
+        `Testing TOTH ${tothCut} DEGEN`,
+        "0xe2ea9f4dedc4ab2ffba3e2718aa0521ad2d60b4c"
       );
     });
   } catch (error) {
