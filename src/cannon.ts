@@ -1,17 +1,37 @@
 import cron from "node-cron";
-import { postCastCannon } from "./neynar/client";
+import { client, postCastCannon } from "./neynar/client";
 import { Signer } from "@neynar/nodejs-sdk/build/neynar-api/v2";
 import { fetchDegenTips } from "./degen/degenAPI";
 import fetch from "node-fetch";
 
 export const fetchApprovedSigners = async (): Promise<Signer[]> => {
-  const endpoint = `${process.env.PUBLIC_URL}/approvedSigners`;
+  const endpoint = `${process.env.PUBLIC_URL}/allSigners`;
 
   try {
     const response = await fetch(endpoint);
     const signers = await response.json();
 
-    return signers;
+    const approvedSigners = await Promise.all(
+      signers.map(async (signer: Signer) => {
+        return await client.lookupDeveloperManagedSigner(signer.public_key);
+      })
+    );
+
+    const filteredSigners = approvedSigners.filter((signer) => {
+      return signer.status === "approved";
+    });
+
+    const mmm = filteredSigners.map((signer) => {
+      const current = signers.find((s: Signer) => s.fid === signer.fid);
+      return {
+        fid: current.fid,
+        public_key: current.public_key,
+        status: current.status,
+        signer_uuid: current.signer_uuid,
+      };
+    });
+
+    return mmm;
   } catch (error) {
     console.error("Error fetching approved signers:", error);
     throw error;
@@ -46,10 +66,11 @@ export const executeCannon = async () => {
     // 3. Fetch approved signers
     // 4. Post cast cannon to each approved signer
     const castWinner = await fetchCastWinner();
-    const approvedSigners = await fetchApprovedSigners();
+    const allSigners = await fetchApprovedSigners();
 
-    approvedSigners.forEach(async (signer) => {
+    allSigners.forEach(async (signer) => {
       const { remainingAllowance } = await fetchDegenTips(signer.fid || 0);
+
       await postCastCannon(
         signer.signer_uuid,
         `Testing TOTH ${remainingAllowance} DEGEN`,

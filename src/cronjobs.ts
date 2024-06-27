@@ -1,6 +1,7 @@
 import cron from "node-cron";
 import { Round } from "./schemas/round";
 import cryptoModule from "crypto";
+import { client } from "./neynar/client";
 
 // Function to update rounds
 async function updateRounds() {
@@ -18,7 +19,7 @@ async function updateRounds() {
       if (round.status === "nominating" && now >= round.nominationEndTime) {
         round.status = "voting";
         round.votingStartTime = now; // Assuming this needs to be set here
-      } else if (round.status === "voting" && now >= round.votingEndTime) {
+      } else if (round.status === "voting") {
         round.status = "completed";
         round.winner = await saveWinner();
       }
@@ -72,9 +73,14 @@ export const saveWinner = async (): Promise<string> => {
   try {
     const response = await fetch(endpoint);
     const json = await response.json();
-
     const castWinner = json[0];
-    return `https://warpcast.com/${castWinner.username}/${castWinner.castId}`;
+
+    const cast = await client.lookUpCastByHashOrWarpcastUrl(
+      `https://warpcast.com/${castWinner.username}/${castWinner.castId}`,
+      "url"
+    );
+
+    return cast.cast.hash;
   } catch (error) {
     console.error("Error fetching cast winner:", error);
     throw error;
@@ -89,8 +95,8 @@ export const setupCronJobs = async () => {
     await createNewRound();
   });
 
-  cron.schedule("0 18 * * *", async () => {
-    console.log("Updating rounds: 6 PM UTC");
-    await updateRounds();
-  });
+  // cron.schedule("0 18 * * *", async () => {
+  console.log("Updating rounds: 6 PM UTC");
+  await updateRounds();
+  // });
 };

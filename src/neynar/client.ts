@@ -30,8 +30,9 @@ export const postCastCannon = async (
   const idem = randomUUID();
   await retry(async () => {
     await client.publishCast(signerUuid, text, {
-      replyTo,
+      replyTo: replyTo,
       idem,
     });
+    console.warn("success");
   }, retries);
 };

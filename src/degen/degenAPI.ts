@@ -20,8 +20,8 @@ export const fetchDegenTips = async (
   const degenJson = await degenResponse.json();
 
   return {
-    remainingAllowance: degenJson.remaining_allowance,
-    allowance: degenJson.tip_allowance,
+    remainingAllowance: degenJson.allowance.remaining_allowance,
+    allowance: degenJson.allowance.tip_allowance,
   };
 };
 
