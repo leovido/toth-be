@@ -1,5 +1,9 @@
+import dotenv from "dotenv";
+import path from "path";
 import { NeynarAPIClient } from "@neynar/nodejs-sdk";
 import { randomUUID } from "crypto";
+
+dotenv.config({ path: path.resolve(__dirname, "../../.env") });
 
 export const client = new NeynarAPIClient(process.env.NEYNAR_API_KEY || "");
 

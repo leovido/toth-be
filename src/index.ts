@@ -14,6 +14,7 @@ import historyRoutes from "./routes/historyRoute";
 import helperRoutes from "./routes/helpersRoute";
 
 import { setupCronJobs } from "./cronjobs";
+import { cannonCronJob } from "./cannon";
 
 dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
@@ -33,6 +34,7 @@ const port = process.env.PORT || 3011;
 // MongoDB connection
 mongoose.connect(process.env.DB_INSTANCE ?? "").then(() => {
   setupCronJobs();
+  cannonCronJob();
 });
 
 const db = mongoose.connection;

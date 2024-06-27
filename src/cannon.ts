@@ -52,7 +52,7 @@ export const executeCannon = async () => {
       const { remainingAllowance } = await fetchDegenTips(signer.fid || 0);
       await postCastCannon(
         signer.signer_uuid,
-        `${remainingAllowance} DEGEN`,
+        `Testing TOTH ${remainingAllowance} DEGEN`,
         castWinner
       );
     });
