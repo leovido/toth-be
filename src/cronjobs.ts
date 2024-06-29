@@ -18,7 +18,7 @@ async function updateRounds() {
     for (const round of rounds) {
       if (round.status === "nominating" && now >= round.nominationEndTime) {
         round.status = "voting";
-        round.votingStartTime = now; // Assuming this needs to be set here
+        round.votingStartTime = now;
       } else if (round.status === "voting") {
         round.status = "completed";
         round.winner = await saveWinner();
@@ -102,8 +102,8 @@ export const setupCronJobs = async () => {
     await createNewRound();
   });
 
-  // cron.schedule("0 18 * * *", async () => {
-  console.log("Updating rounds: 6 PM UTC");
-  await updateRounds();
-  // });
+  cron.schedule("0 18 * * *", async () => {
+    console.log("Updating rounds: 6 PM UTC");
+    await updateRounds();
+  });
 };
