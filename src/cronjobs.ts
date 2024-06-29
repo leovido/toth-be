@@ -29,6 +29,7 @@ async function updateRounds() {
   } catch (error) {
     console.error("Error updating rounds:", error);
     // Consider re-throwing or handling specific errors further here
+    throw error;
   }
 }
 
@@ -67,20 +68,26 @@ async function createNewRound() {
   }
 }
 
-export const saveWinner = async (): Promise<string> => {
+export const saveWinner = async (): Promise<string | null> => {
   const endpoint = `${process.env.PUBLIC_URL}/nominations`;
 
   try {
     const response = await fetch(endpoint);
     const json = await response.json();
-    const castWinner = json[0];
 
-    const cast = await client.lookUpCastByHashOrWarpcastUrl(
-      `https://warpcast.com/${castWinner.username}/${castWinner.castId}`,
-      "url"
-    );
+    const isEmpty = json.length === 0;
+    if (!isEmpty) {
+      const castWinner = json[0];
 
-    return cast.cast.hash;
+      const cast = await client.lookUpCastByHashOrWarpcastUrl(
+        `https://warpcast.com/${castWinner.username}/${castWinner.castId}`,
+        "url"
+      );
+
+      return cast.cast.hash;
+    } else {
+      return null;
+    }
   } catch (error) {
     console.error("Error fetching cast winner:", error);
     throw error;
@@ -95,8 +102,8 @@ export const setupCronJobs = async () => {
     await createNewRound();
   });
 
-  cron.schedule("0 18 * * *", async () => {
-    console.log("Updating rounds: 6 PM UTC");
-    await updateRounds();
-  });
+  // cron.schedule("0 18 * * *", async () => {
+  console.log("Updating rounds: 6 PM UTC");
+  await updateRounds();
+  // });
 };
