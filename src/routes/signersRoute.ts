@@ -6,6 +6,18 @@ const router = express.Router();
 
 router.get("/signers", async (req, res) => {
   const signer = await Signer.findOne({
+    public_key: { $eq: req.query.publicKey },
+  });
+
+  if (signer) {
+    res.status(200).send(signer);
+  } else {
+    res.status(204).json();
+  }
+});
+
+router.get("/signers", async (req, res) => {
+  const signer = await Signer.findOne({
     fid: { $eq: req.query.fid },
   });
 

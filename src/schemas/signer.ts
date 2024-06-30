@@ -5,13 +5,17 @@ const SignerSchema = new mongoose.Schema({
     type: String,
     required: [true, "id is required"],
   },
+  fid: {
+    type: Number,
+    required: [false, "fid not required"],
+  },
   signer_uuid: {
     type: String,
-    required: [true, "signer_uuid is required"],
+    required: [false, "signer_uuid is required"],
   },
   createdAt: {
     type: Date,
-    required: [true, "createdAt is required"],
+    required: [false, "createdAt is required"],
   },
   public_key: {
     type: String,
@@ -23,7 +27,7 @@ const SignerSchema = new mongoose.Schema({
   },
   signer_approval_url: {
     type: String,
-    required: [true, "signer_approval_url is required"],
+    required: [false, "signer_approval_url is required"],
   },
 });
 
