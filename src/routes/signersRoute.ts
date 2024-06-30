@@ -49,12 +49,13 @@ router.post("/signers", async (req, res) => {
 router.post("/updateSigner", async (req, res) => {
   try {
     const signer = await Signer.findOne({
-      fid: { $eq: req.body.fid },
+      public_key: { $eq: req.body.publicKey },
     });
 
     const _updatedSigner = {
       ...signer?.toJSON(),
       status: "approved",
+      fid: req.body.fid,
     };
 
     const updatedSigner = new Signer(_updatedSigner);
