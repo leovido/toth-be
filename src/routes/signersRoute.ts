@@ -42,7 +42,7 @@ router.post("/updateSigner", async (req, res) => {
 
     const _updatedSigner = {
       ...signer?.toJSON(),
-      status: req.body.status,
+      status: "approved",
     };
 
     const updatedSigner = new Signer(_updatedSigner);

@@ -5,10 +5,6 @@ const SignerSchema = new mongoose.Schema({
     type: String,
     required: [true, "id is required"],
   },
-  fid: {
-    type: Number,
-    required: [true, "id is required"],
-  },
   signer_uuid: {
     type: String,
     required: [true, "signer_uuid is required"],
