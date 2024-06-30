@@ -16,7 +16,7 @@ router.get("/signers", async (req, res) => {
   }
 });
 
-router.get("/signers", async (req, res) => {
+router.get("/signersByFid", async (req, res) => {
   const signer = await Signer.findOne({
     fid: { $eq: req.query.fid },
   });
