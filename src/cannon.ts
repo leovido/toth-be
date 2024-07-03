@@ -66,25 +66,28 @@ export const executeCannon = async () => {
     // 3. Fetch approved signers
     // 4. Post cast cannon to each approved signer
     const castWinner = await fetchCastWinner();
-    const allSigners = await fetchApprovedSigners();
 
-    allSigners.forEach(async (signer) => {
-      const { tothCut, castWinnerEarnings } = await tipDistribution(
-        signer.fid || 0
-      );
+    if (castWinner.length > 0) {
+      const allSigners = await fetchApprovedSigners();
 
-      await postCastCannon(
-        signer.signer_uuid,
-        `@tipothehat $${castWinnerEarnings} DEGEN`,
-        castWinner
-      );
+      allSigners.forEach(async (signer) => {
+        const { tothCut, castWinnerEarnings } = await tipDistribution(
+          signer.fid || 0
+        );
 
-      await postCastCannon(
-        signer.signer_uuid,
-        `@tipothehat $${tothCut} DEGEN`,
-        "0xe2ea9f4dedc4ab2ffba3e2718aa0521ad2d60b4c"
-      );
-    });
+        await postCastCannon(
+          signer.signer_uuid,
+          `@tipothehat $${castWinnerEarnings} DEGEN`,
+          castWinner
+        );
+
+        await postCastCannon(
+          signer.signer_uuid,
+          `@tipothehat $${tothCut} DEGEN`,
+          "0xe2ea9f4dedc4ab2ffba3e2718aa0521ad2d60b4c"
+        );
+      });
+    }
   } catch (error) {
     console.error(error);
     throw new Error(`Failed to execute cannon logic ${error}`);
