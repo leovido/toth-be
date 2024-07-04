@@ -14,13 +14,12 @@ export const retry = async (
   for (let i = 0; i < retries; i++) {
     try {
       await fn();
-      return;
     } catch (error) {
-      if (i === retries - 1) throw error;
+      if (i < retries - 1) continue;
+      throw error;
     }
   }
 };
-
 export const postCastCannon = async (
   signerUuid: string,
   text: string,

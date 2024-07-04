@@ -21,7 +21,7 @@ async function updateRounds() {
         round.votingStartTime = now;
       } else if (round.status === "voting") {
         round.status = "completed";
-        round.winner = await saveWinner();
+        round.winner = await saveWinner(round.id);
       }
 
       await round.save();
@@ -68,8 +68,8 @@ async function createNewRound() {
   }
 }
 
-export const saveWinner = async (): Promise<string | null> => {
-  const endpoint = `${process.env.PUBLIC_URL}/nominations`;
+export const saveWinner = async (roundId: string): Promise<string | null> => {
+  const endpoint = `${process.env.PUBLIC_URL}/nominationsByRound?roundId=${roundId}`;
 
   try {
     const response = await fetch(endpoint);
@@ -77,7 +77,11 @@ export const saveWinner = async (): Promise<string | null> => {
 
     const isEmpty = json.length === 0;
     if (!isEmpty) {
-      const castWinner = json[0];
+      const sorted = json.sort(
+        (a: { votesCount: number }, b: { votesCount: number }) =>
+          b.votesCount - a.votesCount
+      );
+      const castWinner = sorted[0];
 
       const cast = await client.lookUpCastByHashOrWarpcastUrl(
         `https://warpcast.com/${castWinner.username}/${castWinner.castId}`,
@@ -98,7 +102,6 @@ export const saveWinner = async (): Promise<string | null> => {
 export const setupCronJobs = async () => {
   cron.schedule("0 0 * * *", async () => {
     console.log("Updating rounds: 12 AM UTC");
-    await updateRounds();
     await createNewRound();
   });
 

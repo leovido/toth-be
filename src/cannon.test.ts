@@ -52,19 +52,19 @@ describe("fetchCastWinner", () => {
     expect(result).toEqual(mockResponse.winner);
   });
 
-  // it("should handle error when fetching the cast winner", async () => {
-  //   const errorMessage = "Failed to fetch cast winner";
+  it("should handle error when fetching the cast winner", async () => {
+    const errorMessage = "Failed to fetch cast winner";
 
-  //   const mockResponse = {
-  //     ok: false,
-  //     status: 500,
-  //     json: () => Promise.reject(),
-  //   };
+    const mockResponse = {
+      ok: false,
+      status: 500,
+      json: () => Promise.reject(),
+    };
 
-  //   mockedFetch.mockResolvedValueOnce(mockResponse as unknown as Response);
+    mockedFetch.mockResolvedValueOnce(mockResponse as unknown as Response);
 
-  //   await expect(fetchCastWinner()).rejects.toThrow(errorMessage);
-  // });
+    await expect(cannonModule.fetchCastWinner()).rejects.toThrow(errorMessage);
+  });
 });
 
 describe("cannonCronJob", () => {

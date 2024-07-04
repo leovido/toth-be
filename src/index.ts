@@ -32,9 +32,9 @@ app.use(helperRoutes);
 const port = process.env.PORT || 3011;
 
 // MongoDB connection
-mongoose.connect(process.env.DB_INSTANCE ?? "").then(() => {
-  setupCronJobs();
-  cannonCronJob();
+mongoose.connect(process.env.DB_INSTANCE ?? "").then(async () => {
+  await setupCronJobs();
+  await cannonCronJob();
 });
 
 const db = mongoose.connection;

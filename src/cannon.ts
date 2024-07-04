@@ -47,7 +47,6 @@ export const fetchCastWinner = async (): Promise<string> => {
 
     return castWinner.winner;
   } catch (error) {
-    console.error("Error fetching cast winner:", error);
     throw new Error(`Failed to fetch cast winner: ${error}`);
   }
 };
