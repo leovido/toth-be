@@ -19,7 +19,7 @@ const SignerSchema = new mongoose.Schema({
   },
   public_key: {
     type: String,
-    required: [true, "public_key is required"],
+    required: [false, "public_key is required"],
   },
   status: {
     type: String,

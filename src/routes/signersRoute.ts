@@ -16,6 +16,18 @@ router.get("/signers", async (req, res) => {
   }
 });
 
+router.get("/signerByUUID", async (req, res) => {
+  const signer = await Signer.findOne({
+    signer_uuid: { $eq: req.query.signerUUID },
+  });
+
+  if (signer) {
+    res.status(200).send(signer);
+  } else {
+    res.status(204).json();
+  }
+});
+
 router.get("/signersByFid", async (req, res) => {
   const signer = await Signer.findOne({
     fid: { $eq: req.query.fid },
@@ -49,12 +61,13 @@ router.post("/signers", async (req, res) => {
 router.post("/updateSigner", async (req, res) => {
   try {
     const signer = await Signer.findOne({
-      public_key: { $eq: req.body.publicKey },
+      signer_uuid: { $eq: req.body.signerUUID },
     });
 
     const _updatedSigner = {
       ...signer?.toJSON(),
-      status: "approved",
+      signer_uuid: req.body.signerUUID,
+      status: req.body.status,
       fid: req.body.fid,
     };
 
