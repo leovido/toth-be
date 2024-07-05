@@ -82,7 +82,7 @@ export const executeCannon = async () => {
 
         await postCastCannon(
           signer.signer_uuid,
-          `@tipothehat $${tothCut} DEGEN`,
+          `Your cast is the winner for @tipothehat. Follow us on /tipothehat ${tothCut} $DEGEN`,
           "0xe2ea9f4dedc4ab2ffba3e2718aa0521ad2d60b4c"
         );
       });
