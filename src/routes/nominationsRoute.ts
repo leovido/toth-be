@@ -17,7 +17,7 @@ router.post("/nominations", async (req, res) => {
       {
         $match: {
           createdAt: { $gte: startToday, $lte: endToday },
-          fid: 203666,
+          fid: req.body.fid,
         },
       },
       {
