@@ -41,8 +41,8 @@ export const tipDistribution = async (fid: number) => {
     );
   }
 
-  const tothCut = Math.floor(remainingAllowance * 0.15); // 15% to @tipothehat
-  const castWinnerEarnings = Math.floor(remainingAllowance * 0.85); // 85% to the cast winner
+  const tothCut = Math.floor(remainingAllowance * 0.1); // 10% to @tipothehat
+  const castWinnerEarnings = Math.floor(remainingAllowance * 0.9); // 90% to the cast winner
 
   return {
     tothCut,

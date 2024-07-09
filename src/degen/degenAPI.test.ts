@@ -75,9 +75,9 @@ describe("tipDistribution", () => {
     } as Response);
 
     const expectedTothCut =
-      Number(mockResponse.allowance.remaining_allowance) * 0.15;
+      Number(mockResponse.allowance.remaining_allowance) * 0.1;
     const expectedCastWinnerEarnings =
-      Number(mockResponse.allowance.remaining_allowance) * 0.85;
+      Number(mockResponse.allowance.remaining_allowance) * 0.9;
 
     const result = await tipDistribution(fid);
 
