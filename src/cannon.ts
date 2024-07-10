@@ -59,7 +59,6 @@ export const cannonCronJob = async () => {
 
 export const executeCannon = async () => {
   try {
-    console.warn("cannon fired");
     // 1. Fetch DEGEN remaining
     // 2. Fetch castWinner
     // 3. Fetch approved signers
@@ -74,17 +73,18 @@ export const executeCannon = async () => {
           signer.fid || 0
         );
 
-        await postCastCannon(
-          signer.signer_uuid,
-          `@tipothehat $${castWinnerEarnings} DEGEN`,
-          castWinner
-        );
-
-        await postCastCannon(
-          signer.signer_uuid,
-          `Your cast is the winner for @tipothehat. Follow us on /tipothehat ${tothCut} $DEGEN`,
-          "0xe2ea9f4dedc4ab2ffba3e2718aa0521ad2d60b4c"
-        );
+        await Promise.all([
+          postCastCannon(
+            signer.signer_uuid,
+            `Congratulations!🎉\n\nYour cast is the winner for @tipothehat\n\nFollow us on /tipothehat\n\n${castWinnerEarnings} $DEGEN`,
+            castWinner
+          ),
+          postCastCannon(
+            signer.signer_uuid,
+            `${tothCut} $DEGEN`,
+            "0xe2ea9f4dedc4ab2ffba3e2718aa0521ad2d60b4c"
+          ),
+        ]);
       });
     }
   } catch (error) {
