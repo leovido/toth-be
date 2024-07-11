@@ -15,20 +15,10 @@ const mockedPostCastCannon = neynarModule.postCastCannon as jest.MockedFunction<
 >;
 
 describe("postCastCannon", () => {
-  it("should retry any function", async () => {
-    await neynarModule.retry(async () => {
-      async () => {
-        // eslint-disable-next-line no-console
-        console.log("Hello, retry!");
-      };
-    }, 3);
-  });
-
   it("should handle failure of postCastCannon", async () => {
     const signerUuid = "18b16858-01eb-49f4-a1d7-14d11d4264c5";
     const text = "Hello, world!";
     const replyTo = "123456789";
-    const retries = 3;
 
     // Mock the postCastCannon function to throw an error
     mockedPostCastCannon.mockRejectedValueOnce(
@@ -36,13 +26,12 @@ describe("postCastCannon", () => {
     );
 
     await expect(
-      neynarModule.postCastCannon(signerUuid, text, replyTo, retries)
+      neynarModule.postCastCannon(signerUuid, text, replyTo)
     ).rejects.toThrow("Failed to post cast");
     expect(neynarModule.postCastCannon).toHaveBeenCalledWith(
       signerUuid,
       text,
-      replyTo,
-      retries
+      replyTo
     );
   });
 
@@ -50,15 +39,13 @@ describe("postCastCannon", () => {
     const signerUuid = "18b16858-01eb-49f4-a1d7-14d11d4264c5";
     const text = "Hello, world!";
     const replyTo = "123456789";
-    const retries = 3;
 
-    await neynarModule.postCastCannon(signerUuid, text, replyTo, retries);
+    await neynarModule.postCastCannon(signerUuid, text, replyTo);
 
     expect(neynarModule.postCastCannon).toHaveBeenCalledWith(
       signerUuid,
       text,
-      replyTo,
-      retries
+      replyTo
     );
   });
 });

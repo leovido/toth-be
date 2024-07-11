@@ -12,10 +12,6 @@ jest.mock("node-cron", () => ({
   schedule: jest.fn(),
 }));
 
-jest.mock("./neynar/client", () => ({
-  postCastCannon: jest.fn(),
-}));
-
 const mockApprovedSigners: Signer[] = [
   {
     fid: 203666,
@@ -40,7 +36,7 @@ const mockApprovedSigners: Signer[] = [
 describe("fetchCastWinner", () => {
   it("should fetch the cast winner successfully", async () => {
     const mockResponse = {
-      winner: "John Doe",
+      winner: "0xe2ea9f4dedc4ab2ffba3e2718aa0521ad2d60b4c",
     };
     mockedFetch.mockResolvedValueOnce({
       ok: true,
@@ -69,7 +65,9 @@ describe("fetchCastWinner", () => {
 
 describe("cannonCronJob", () => {
   beforeEach(() => {
-    jest.spyOn(cannonModule, "fetchCastWinner").mockResolvedValue("John Doe");
+    jest
+      .spyOn(cannonModule, "fetchCastWinner")
+      .mockResolvedValue("0xe2ea9f4dedc4ab2ffba3e2718aa0521ad2d60b4c");
     jest
       .spyOn(cannonModule, "fetchApprovedSigners")
       .mockResolvedValue(mockApprovedSigners);
@@ -98,23 +96,4 @@ describe("cannonCronJob", () => {
     expect(cannonModule.fetchApprovedSigners).toHaveBeenCalled();
     expect(degenAPIModule.fetchDegenTips).toHaveBeenCalledTimes(2);
   });
-
-  // it("should handle errors during cannon execution", async () => {
-  //   const { fetchDegenTips } = require("./degen/degenAPI");
-  //   const cron = require("node-cron");
-
-  //   const errorMessage = "Failed to fetch cast winner";
-  //   fetchCastWinner.mockRejectedValue(new Error(errorMessage));
-
-  //   await expect(cannonCronJob()).rejects.toThrow(errorMessage);
-
-  //   expect(cron.schedule).toHaveBeenCalledWith(
-  //     "0 0 * * *",
-  //     expect.any(Function)
-  //   );
-  //   expect(fetchCastWinner).toHaveBeenCalled();
-  //   expect(fetchApprovedSigners).not.toHaveBeenCalled();
-  //   expect(fetchDegenTips).not.toHaveBeenCalled();
-  //   expect(require("./neynar/client").postCastCannon).not.toHaveBeenCalled();
-  // });
 });
