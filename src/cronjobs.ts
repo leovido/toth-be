@@ -94,7 +94,7 @@ export const saveWinner = async (roundId: string): Promise<string | null> => {
     }
   } catch (error) {
     console.error("Error fetching cast winner:", error);
-    throw error;
+    return "";
   }
 };
 

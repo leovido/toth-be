@@ -1,5 +1,4 @@
 import * as cannonModule from "./cannon";
-import { jest } from "@jest/globals";
 import { Signer } from "@neynar/nodejs-sdk/build/neynar-api/v2";
 import * as degenAPIModule from "./degen/degenAPI";
 
