@@ -10,12 +10,39 @@ describe("fetchDegenTips", () => {
   afterEach(() => {
     jest.clearAllMocks();
   });
+
+  it("should return 0 when Error is in the response", async () => {
+    const fid = 1;
+    const mockResponse = {
+      Error: "No such document",
+    };
+
+    mockedFetch.mockResolvedValueOnce({
+      ok: true,
+      json: () => Promise.resolve(mockResponse),
+    } as Response);
+
+    const response = await fetchDegenTips(fid);
+
+    expect(mockedFetch).toHaveBeenCalledWith(
+      `https://www.degentip.me/api/get_allowance?fid=${fid}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    expect(response.allowance).toEqual("0");
+    expect(response.remainingAllowance).toEqual("0");
+  });
+
   it("should fetch tip allowance from degen.tips API", async () => {
     const fid = 1;
     const mockResponse = {
       allowance: {
         tip_allowance: "1000",
-        remaining_allowance: "434",
+        remaining_tip_allowance: "434",
       },
     };
 
@@ -37,7 +64,7 @@ describe("fetchDegenTips", () => {
     );
     expect(response.allowance).toEqual(mockResponse.allowance.tip_allowance);
     expect(response.remainingAllowance).toEqual(
-      mockResponse.allowance.remaining_allowance
+      mockResponse.allowance.remaining_tip_allowance
     );
   });
 
@@ -66,7 +93,7 @@ describe("tipDistribution", () => {
     const mockResponse = {
       allowance: {
         tip_allowance: "1000",
-        remaining_allowance: "1000",
+        remaining_tip_allowance: "1000",
       },
     };
     mockedFetch.mockResolvedValueOnce({
@@ -75,9 +102,9 @@ describe("tipDistribution", () => {
     } as Response);
 
     const expectedTothCut =
-      Number(mockResponse.allowance.remaining_allowance) * 0.1;
+      Number(mockResponse.allowance.remaining_tip_allowance) * 0.1;
     const expectedCastWinnerEarnings =
-      Number(mockResponse.allowance.remaining_allowance) * 0.9;
+      Number(mockResponse.allowance.remaining_tip_allowance) * 0.9 - 1;
 
     const result = await tipDistribution(fid);
 
@@ -90,7 +117,7 @@ describe("tipDistribution", () => {
     const mockResponse = {
       allowance: {
         tip_allowance: "1000",
-        remaining_allowance: "-1",
+        remaining_tip_allowance: "-1",
       },
     };
     mockedFetch.mockResolvedValueOnce({
@@ -109,7 +136,7 @@ describe("tipDistribution", () => {
     const mockResponse = {
       allowance: {
         tip_allowance: "1000",
-        remaining_allowance: "0",
+        remaining_tip_allowance: "0",
       },
     };
     mockedFetch.mockResolvedValueOnce({
@@ -128,7 +155,7 @@ describe("tipDistribution", () => {
     const mockResponse = {
       allowance: {
         tip_allowance: "1000",
-        remaining_allowance: "1",
+        remaining_tip_allowance: "1",
       },
     };
     mockedFetch.mockResolvedValueOnce({

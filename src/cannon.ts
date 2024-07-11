@@ -64,10 +64,9 @@ export const executeCannon = async () => {
     // 3. Fetch approved signers
     // 4. Post cast cannon to each approved signer
     const castWinner = await fetchCastWinner();
+    const allSigners = await fetchApprovedSigners();
 
     if (castWinner.length > 0) {
-      const allSigners = await fetchApprovedSigners();
-
       allSigners.forEach(async (signer) => {
         const { tothCut, castWinnerEarnings } = await tipDistribution(
           signer.fid || 0
@@ -85,6 +84,19 @@ export const executeCannon = async () => {
             "0xe2ea9f4dedc4ab2ffba3e2718aa0521ad2d60b4c"
           ),
         ]);
+      });
+    } else {
+      allSigners.forEach(async (signer) => {
+        const { tothCut, castWinnerEarnings } = await tipDistribution(
+          signer.fid || 0
+        );
+        const aggregateTips = tothCut + castWinnerEarnings;
+
+        await postCastCannon(
+          signer.signer_uuid,
+          `${aggregateTips} $DEGEN`,
+          "0xe2ea9f4dedc4ab2ffba3e2718aa0521ad2d60b4c"
+        );
       });
     }
   } catch (error) {
