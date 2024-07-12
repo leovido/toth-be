@@ -38,7 +38,7 @@ export const fetchApprovedSigners = async (): Promise<Signer[]> => {
   }
 };
 
-export const fetchCastWinner = async (): Promise<string> => {
+export const fetchCastWinner = async (): Promise<string | null> => {
   const endpoint = `${process.env.PUBLIC_URL}/latest-round`;
 
   try {
@@ -48,8 +48,7 @@ export const fetchCastWinner = async (): Promise<string> => {
     return castWinner.winner;
   } catch (error) {
     console.error("no winner");
-    return ""
-    // throw new Error(`Failed to fetch cast winner: ${error}`);
+    return "";
   }
 };
 
@@ -68,7 +67,7 @@ export const executeCannon = async () => {
     const castWinner = await fetchCastWinner();
     const allSigners = await fetchApprovedSigners();
 
-    if (castWinner.length > 0) {
+    if (castWinner !== null) {
       allSigners.forEach(async (signer) => {
         const { tothCut, castWinnerEarnings } = await tipDistribution(
           signer.fid || 0
