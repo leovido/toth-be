@@ -5,7 +5,7 @@ import { Nomination } from "../schemas/nomination";
 
 const router = express.Router();
 
-router.post("/nominations", async (req, res) => {
+router.post("/nominations", async (req, res, next) => {
   const startToday = new Date();
   startToday.setUTCHours(0, 0, 0, 0);
 
@@ -43,8 +43,8 @@ router.post("/nominations", async (req, res) => {
     } else {
       res.status(200).send("Already nominated");
     }
-  } catch (err) {
-    res.status(400).send(err);
+  } catch (error) {
+    next(error);
   }
 });
 
@@ -224,16 +224,10 @@ router.get("/nominationsByFid", (req, res) => {
 // Fetches the current nominations for TODAY
 router.get("/nominations", (req, res) => {
   const startToday = new Date();
-  startToday.setUTCHours(0);
-  startToday.setUTCMinutes(0);
-  startToday.setUTCSeconds(0);
-  startToday.setUTCMilliseconds(0);
+  startToday.setUTCHours(18, 0, 0, 0);
 
   const endToday = new Date();
-  endToday.setUTCHours(18);
-  endToday.setUTCMinutes(0);
-  endToday.setUTCSeconds(0);
-  endToday.setUTCMilliseconds(0);
+  endToday.setUTCHours(18, 0, 0, 0);
 
   const pipeline: PipelineStage[] = [
     {
