@@ -68,7 +68,7 @@ export const executeCannon = async () => {
     const castWinner = await fetchCastWinner();
     const allSigners = await fetchApprovedSigners();
 
-    if (castWinner !== null) {
+    if (castWinner !== "") {
       allSigners.forEach(async (signer) => {
         const { tothCut, castWinnerEarnings } = await tipDistribution(
           signer.fid || 0
