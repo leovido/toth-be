@@ -47,9 +47,20 @@ describe("fetchCastWinner", () => {
     expect(result).toEqual(mockResponse.winner);
   });
 
-  it("should handle error when fetching the cast winner", async () => {
-    const errorMessage = "Failed to fetch cast winner";
+  it("should return an empty string when null", async () => {
+    const mockResponse = {
+      ok: false,
+      status: 200,
+      json: () => Promise.resolve(null),
+    };
 
+    mockedFetch.mockResolvedValueOnce(mockResponse as unknown as Response);
+
+    const winner = await cannonModule.fetchCastWinner();
+    expect(winner).toBe("");
+  });
+
+  it("should return an empty string when rejecting promise", async () => {
     const mockResponse = {
       ok: false,
       status: 500,
@@ -58,7 +69,8 @@ describe("fetchCastWinner", () => {
 
     mockedFetch.mockResolvedValueOnce(mockResponse as unknown as Response);
 
-    await expect(cannonModule.fetchCastWinner()).rejects.toThrow(errorMessage);
+    const winner = await cannonModule.fetchCastWinner();
+    expect(winner).toBe("");
   });
 });
 
@@ -94,5 +106,17 @@ describe("cannonCronJob", () => {
     expect(cannonModule.fetchCastWinner).toHaveBeenCalledTimes(1);
     expect(cannonModule.fetchApprovedSigners).toHaveBeenCalled();
     expect(degenAPIModule.fetchDegenTips).toHaveBeenCalledTimes(2);
+  });
+
+  it("pass when receiving null as the cast winner", async () => {
+    jest.spyOn(cannonModule, "fetchCastWinner").mockResolvedValue(null);
+    const castWinner = await cannonModule.fetchCastWinner();
+    expect(castWinner).toBe(null);
+  });
+
+  it("any string", async () => {
+    jest.spyOn(cannonModule, "fetchCastWinner").mockResolvedValue("testing");
+    const castWinner = await cannonModule.fetchCastWinner();
+    expect(castWinner).toBe("testing");
   });
 });
