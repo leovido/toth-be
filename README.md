@@ -41,11 +41,11 @@ Tips go to the cast creator. If the creator tags others, the tip is split equall
 
 1. Clone the repo
 ```sh
-git clone https://github.com/github_username/repo_name.git
+git clone https://github.com/leovido/toth-be.git
 ```
 2. To run the app, run the following
   ```sh
-  pnpm i && nodemon
+  npm i && nodemon
   ```
 3. You will also need the following `.env` variables. Make sure to set up MongoDB on your end. 
 
@@ -84,9 +84,6 @@ See `LICENSE.txt` for more information.
 Leovido - [@warpcast handle](https://warpcast.com/leovido.eth) - toth.jazz924@passinbox.com
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
-
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
