@@ -5,7 +5,7 @@ import { Round } from "../schemas/round";
 
 const router = express.Router();
 
-router.post("/votes", async (req, res) => {
+router.post("/votes", async (req, res, next) => {
   try {
     const { roundId, fid } = req.body;
     const round = await Round.findOne({
@@ -46,7 +46,7 @@ router.post("/votes", async (req, res) => {
       })
       .catch((err: unknown) => res.status(500).send(err));
   } catch (e) {
-    return res.status(400).send({ error: `${e}` });
+    next(e);
   }
 });
 

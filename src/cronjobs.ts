@@ -2,9 +2,10 @@ import cron from "node-cron";
 import { Round } from "./schemas/round";
 import cryptoModule from "crypto";
 import { client } from "./neynar/client";
+import * as Sentry from "@sentry/node";
 
 // Function to update rounds
-async function updateRounds() {
+const updateRounds = async () => {
   const now = new Date();
 
   try {
@@ -27,13 +28,12 @@ async function updateRounds() {
       await round.save();
     }
   } catch (error) {
-    console.error("Error updating rounds:", error);
-    // Consider re-throwing or handling specific errors further here
+    console.error(error);
     throw error;
   }
-}
+};
 
-async function createNewRound() {
+const createNewRound = async () => {
   const nominationEndTime = new Date();
   nominationEndTime.setUTCHours(18, 0, 0, 0);
 
@@ -53,7 +53,7 @@ async function createNewRound() {
     votingEndTime,
     createdAt: new Date(),
     status: "nominating",
-    winner: null,
+    winner: "",
   });
 
   try {
@@ -61,14 +61,13 @@ async function createNewRound() {
     await newRound.save();
 
     return newRound;
-  } catch (e) {
-    console.error(e);
-
-    throw e;
+  } catch (error) {
+    console.error(error);
+    throw error;
   }
-}
+};
 
-export const saveWinner = async (roundId: string): Promise<string | null> => {
+export const saveWinner = async (roundId: string): Promise<string> => {
   const endpoint = `${process.env.PUBLIC_URL}/nominationsByRound?roundId=${roundId}`;
 
   try {
@@ -90,7 +89,7 @@ export const saveWinner = async (roundId: string): Promise<string | null> => {
 
       return cast.cast.hash;
     } else {
-      return null;
+      return "";
     }
   } catch (error) {
     console.error("Error fetching cast winner:", error);
@@ -101,12 +100,12 @@ export const saveWinner = async (roundId: string): Promise<string | null> => {
 // Export the cron job setup function
 export const setupCronJobs = async () => {
   cron.schedule("0 0 * * *", async () => {
-    console.log("Updating rounds: 12 AM UTC");
     await createNewRound();
+    Sentry.captureMessage("Updating rounds: 12 AM UTC");
   });
 
   cron.schedule("0 18 * * *", async () => {
-    console.log("Updating rounds: 6 PM UTC");
     await updateRounds();
+    Sentry.captureMessage("Updating rounds: 6 PM UTC");
   });
 };

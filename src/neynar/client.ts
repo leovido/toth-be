@@ -14,8 +14,13 @@ export const postCastCannon = async (
 ) => {
   const idem = randomUUID();
 
-  await client.publishCast(signerUuid, text, {
-    replyTo: replyTo,
-    idem,
-  });
+  try {
+    await client.publishCast(signerUuid, text, {
+      replyTo: replyTo,
+      idem,
+    });
+  } catch (error) {
+    console.error("Error posting cast cannon:", error);
+    throw error;
+  }
 };

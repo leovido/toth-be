@@ -3,6 +3,7 @@ import { client, postCastCannon } from "./neynar/client";
 import { Signer } from "@neynar/nodejs-sdk/build/neynar-api/v2";
 import { tipDistribution } from "./degen/degenAPI";
 import fetch from "node-fetch";
+import * as Sentry from "@sentry/node";
 
 export const fetchApprovedSigners = async (): Promise<Signer[]> => {
   const endpoint = `${process.env.PUBLIC_URL}/allSigners`;
@@ -17,28 +18,28 @@ export const fetchApprovedSigners = async (): Promise<Signer[]> => {
       })
     );
 
-    const filteredSigners = approvedSigners.filter((signer) => {
-      return signer.status === "approved";
-    });
+    const filteredSigners = approvedSigners
+      .filter((signer) => {
+        return signer.status === "approved";
+      })
+      .map((signer) => {
+        const current = signers.find((s: Signer) => s.fid === signer.fid);
+        return {
+          fid: current.fid,
+          public_key: current.public_key,
+          status: current.status,
+          signer_uuid: current.signer_uuid,
+        };
+      });
 
-    const mmm = filteredSigners.map((signer) => {
-      const current = signers.find((s: Signer) => s.fid === signer.fid);
-      return {
-        fid: current.fid,
-        public_key: current.public_key,
-        status: current.status,
-        signer_uuid: current.signer_uuid,
-      };
-    });
-
-    return mmm;
+    return filteredSigners;
   } catch (error) {
-    console.error("Error fetching approved signers:", error);
+    Sentry.captureException(`Error fetching approved signers: ${error}`);
     throw error;
   }
 };
 
-export const fetchCastWinner = async (): Promise<string | null> => {
+export const fetchCastWinner = async (): Promise<string> => {
   const endpoint = `${process.env.PUBLIC_URL}/latest-round`;
 
   try {
@@ -47,7 +48,7 @@ export const fetchCastWinner = async (): Promise<string | null> => {
 
     return castWinner.winner;
   } catch (error) {
-    console.error("no winner");
+    Sentry.captureException(error);
     return "";
   }
 };
@@ -67,7 +68,7 @@ export const executeCannon = async () => {
     const castWinner = await fetchCastWinner();
     const allSigners = await fetchApprovedSigners();
 
-    if (castWinner !== null) {
+    if (castWinner !== "") {
       allSigners.forEach(async (signer) => {
         const { tothCut, castWinnerEarnings } = await tipDistribution(
           signer.fid || 0
@@ -101,7 +102,7 @@ export const executeCannon = async () => {
       });
     }
   } catch (error) {
-    console.error(error);
-    throw new Error(`Failed to execute cannon logic ${error}`);
+    Sentry.captureException(error);
+    return;
   }
 };

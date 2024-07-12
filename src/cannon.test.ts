@@ -109,9 +109,9 @@ describe("cannonCronJob", () => {
   });
 
   it("pass when receiving null as the cast winner", async () => {
-    jest.spyOn(cannonModule, "fetchCastWinner").mockResolvedValue(null);
+    jest.spyOn(cannonModule, "fetchCastWinner").mockResolvedValue("");
     const castWinner = await cannonModule.fetchCastWinner();
-    expect(castWinner).toBe(null);
+    expect(castWinner).toBe("");
   });
 
   it("any string", async () => {

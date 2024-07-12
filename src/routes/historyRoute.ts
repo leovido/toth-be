@@ -4,15 +4,19 @@ import { Nomination } from "../schemas/nomination";
 
 const router = express.Router();
 
-router.get("/history", async (req, res) => {
-  const nominations = await Nomination.find({
-    fid: { $eq: req.query.fid },
-  }).limit(5);
+router.get("/history", async (req, res, next) => {
+  try {
+    const nominations = await Nomination.find({
+      fid: { $eq: req.query.fid },
+    }).limit(5);
 
-  res.status(200).send(nominations);
+    res.status(200).send(nominations);
+  } catch (error) {
+    next(error);
+  }
 });
 
-router.get("/history", async (req, res) => {
+router.get("/history", async (req, res, next) => {
   try {
     const nominations = await Nomination.find({
       fid: {
@@ -22,8 +26,7 @@ router.get("/history", async (req, res) => {
 
     res.json(nominations);
   } catch (error) {
-    console.error("Failed to fetch history", error);
-    res.status(500).send("Internal Server Error");
+    next(error);
   }
 });
 

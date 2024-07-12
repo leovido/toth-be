@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const roundSchema = new mongoose.Schema({
+const schemaDefinition = {
   id: {
     type: String,
     required: [true, "id is required"],
@@ -30,7 +30,21 @@ const roundSchema = new mongoose.Schema({
     required: [true, "createdAt is required"],
   },
   status: String, // active, voting, completed
-  winner: { type: mongoose.Schema.Types.String, ref: "Nomination" },
-});
+  winner: { type: String, required: false },
+} as const;
 
-export const Round = mongoose.model("Round", roundSchema);
+const roundSchema = new mongoose.Schema(schemaDefinition);
+
+export interface IRound extends mongoose.Document {
+  id: string;
+  roundNumber: number;
+  nominationStartTime: Date;
+  nominationEndTime: Date;
+  votingStartTime: Date;
+  votingEndTime: Date;
+  createdAt: Date;
+  status: string;
+  winner: string;
+}
+
+export const Round = mongoose.model<IRound>("Round", roundSchema);

@@ -5,7 +5,7 @@ import { Round } from "../schemas/round";
 
 const router = express.Router();
 
-router.get("/degen-tips", async (req, res) => {
+router.get("/degen-tips", async (req, res, next) => {
   try {
     const fid = Number(req.query.fid);
     const json = await fetchDegenTips(fid);
@@ -16,11 +16,11 @@ router.get("/degen-tips", async (req, res) => {
       allowance,
     });
   } catch (error) {
-    res.status(500).send(error);
+    next(error);
   }
 });
 
-router.get("/current-period", async (req, res) => {
+router.get("/current-period", async (req, res, next) => {
   try {
     const now = new Date();
 
@@ -36,8 +36,7 @@ router.get("/current-period", async (req, res) => {
 
     res.json(rounds);
   } catch (error) {
-    console.error("Failed to determine current periods", error);
-    res.status(500).send("Internal Server Error");
+    next(error);
   }
 });
 
