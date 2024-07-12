@@ -100,7 +100,7 @@ export const executeCannon = async () => {
       });
     }
   } catch (error) {
-    console.error(error);
-    throw new Error(`Failed to execute cannon logic ${error}`);
+    console.error(`executeCannon error: ${error}`);
+    return;
   }
 };
