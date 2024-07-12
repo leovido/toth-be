@@ -13,7 +13,7 @@ router.get("/signers", async (req, res, next) => {
     if (signer) {
       res.status(200).send(signer);
     } else {
-      res.status(404).send("Signer not found");
+      res.status(404).json({ error: "Signer not found" });
     }
   } catch (error) {
     next(error);
@@ -29,7 +29,7 @@ router.get("/signerByUUID", async (req, res, next) => {
     if (signer) {
       res.status(200).send(signer);
     } else {
-      res.status(404).send("Signer not found");
+      res.status(404).json({ error: "Signer not found" });
     }
   } catch (error) {
     next(error);
@@ -45,7 +45,7 @@ router.get("/signersByFid", async (req, res, next) => {
     if (signer) {
       res.status(200).send(signer);
     } else {
-      res.status(404).send("Signer not found");
+      res.status(404).json({ error: "Signer not found" });
     }
   } catch (error) {
     next(error);
