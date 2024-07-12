@@ -99,10 +99,10 @@ export const saveWinner = async (roundId: string): Promise<string> => {
 
 // Export the cron job setup function
 export const setupCronJobs = async () => {
-  // cron.schedule("0 0 * * *", async () => {
-  await createNewRound();
-  Sentry.captureMessage("Updating rounds: 12 AM UTC");
-  // });
+  cron.schedule("0 0 * * *", async () => {
+    await createNewRound();
+    Sentry.captureMessage("Updating rounds: 12 AM UTC");
+  });
 
   cron.schedule("0 18 * * *", async () => {
     await updateRounds();
