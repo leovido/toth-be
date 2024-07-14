@@ -61,48 +61,46 @@ export const cannonCronJob = async () => {
 
 export const executeCannon = async () => {
   try {
-    // 1. Fetch DEGEN remaining
-    // 2. Fetch castWinner
-    // 3. Fetch approved signers
-    // 4. Post cast cannon to each approved signer
     const castWinner = await fetchCastWinner();
     const allSigners = await fetchApprovedSigners();
 
-    if (castWinner !== "") {
-      allSigners.forEach(async (signer) => {
-        const { tothCut, castWinnerEarnings } = await tipDistribution(
-          signer.fid || 0
-        );
+    await Promise.allSettled(
+      allSigners.map(async (signer) => {
+        try {
+          const { tothCut, castWinnerEarnings } = await tipDistribution(
+            signer.fid || 0
+          );
 
-        await Promise.all([
-          postCastCannon(
-            signer.signer_uuid,
-            `Congratulations!🎉\n\nYour cast is the winner for @tipothehat\n\nFollow us on /tipothehat\n\n${castWinnerEarnings} $DEGEN`,
-            castWinner
-          ),
-          postCastCannon(
-            signer.signer_uuid,
-            `${tothCut} $DEGEN`,
-            "0xe2ea9f4dedc4ab2ffba3e2718aa0521ad2d60b4c"
-          ),
-        ]);
-      });
-    } else {
-      allSigners.forEach(async (signer) => {
-        const { tothCut, castWinnerEarnings } = await tipDistribution(
-          signer.fid || 0
-        );
-        const aggregateTips = tothCut + castWinnerEarnings;
-
-        await postCastCannon(
-          signer.signer_uuid,
-          `${aggregateTips} $DEGEN`,
-          "0xe2ea9f4dedc4ab2ffba3e2718aa0521ad2d60b4c"
-        );
-      });
-    }
+          if (castWinner !== "") {
+            await Promise.all([
+              postCastCannon(
+                signer.signer_uuid,
+                `Congratulations!🎉\n\nYour cast is the winner for @tipothehat\n\nFollow us on /tipothehat\n\n${castWinnerEarnings} $DEGEN`,
+                castWinner
+              ),
+              postCastCannon(
+                signer.signer_uuid,
+                `${tothCut} $DEGEN`,
+                "0xe2ea9f4dedc4ab2ffba3e2718aa0521ad2d60b4c"
+              ),
+            ]);
+          } else {
+            const aggregateTips = tothCut + castWinnerEarnings;
+            await postCastCannon(
+              signer.signer_uuid,
+              `${aggregateTips} $DEGEN`,
+              "0xe2ea9f4dedc4ab2ffba3e2718aa0521ad2d60b4c"
+            );
+          }
+        } catch (signerError) {
+          Sentry.captureException(signerError);
+        }
+      })
+    );
   } catch (error) {
-    Sentry.captureException(error);
+    Sentry.captureException(error, {
+      extra: { message: "Error in executeCannon function" },
+    });
     return;
   }
 };
