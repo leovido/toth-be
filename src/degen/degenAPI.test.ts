@@ -183,4 +183,21 @@ describe("tipDistribution", () => {
 
     await expect(tipDistribution(fid)).rejects.toThrow(errorMessage);
   });
+
+  it("should handle remaining allowance equal to 1", async () => {
+    const fid = 1;
+    const mockResponse = {
+      allowance: {
+        tip_allowance: "1000",
+        remaining_tip_allowance: "invalid",
+      },
+    };
+    mockedFetch.mockResolvedValueOnce({
+      ok: true,
+      json: () => Promise.resolve(mockResponse),
+    } as Response);
+    expect(tipDistribution(fid)).rejects.toThrow(
+      new Error("Invalid remaining allowance")
+    );
+  });
 });
