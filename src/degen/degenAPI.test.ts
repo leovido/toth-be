@@ -42,7 +42,7 @@ describe("fetchDegenTips", () => {
     const mockResponse = {
       allowance: {
         tip_allowance: "1000",
-        remaining_tip_allowance: "434",
+        remaining_allowance: "434",
       },
     };
 
@@ -64,7 +64,7 @@ describe("fetchDegenTips", () => {
     );
     expect(response.allowance).toEqual(mockResponse.allowance.tip_allowance);
     expect(response.remainingAllowance).toEqual(
-      mockResponse.allowance.remaining_tip_allowance
+      mockResponse.allowance.remaining_allowance
     );
   });
 
@@ -93,7 +93,7 @@ describe("tipDistribution", () => {
     const mockResponse = {
       allowance: {
         tip_allowance: "1000",
-        remaining_tip_allowance: "1000",
+        remaining_allowance: "1000",
       },
     };
     mockedFetch.mockResolvedValueOnce({
@@ -102,9 +102,9 @@ describe("tipDistribution", () => {
     } as Response);
 
     const expectedTothCut =
-      Number(mockResponse.allowance.remaining_tip_allowance) * 0.1;
+      Number(mockResponse.allowance.remaining_allowance) * 0.1;
     const expectedCastWinnerEarnings =
-      Number(mockResponse.allowance.remaining_tip_allowance) * 0.9 - 1;
+      Number(mockResponse.allowance.remaining_allowance) * 0.9 - 1;
 
     const result = await tipDistribution(fid);
 
@@ -117,7 +117,7 @@ describe("tipDistribution", () => {
     const mockResponse = {
       allowance: {
         tip_allowance: "1000",
-        remaining_tip_allowance: "-1",
+        remaining_allowance: "-1",
       },
     };
     mockedFetch.mockResolvedValueOnce({
@@ -136,7 +136,7 @@ describe("tipDistribution", () => {
     const mockResponse = {
       allowance: {
         tip_allowance: "1000",
-        remaining_tip_allowance: "0",
+        remaining_allowance: "0",
       },
     };
     mockedFetch.mockResolvedValueOnce({
@@ -155,7 +155,7 @@ describe("tipDistribution", () => {
     const mockResponse = {
       allowance: {
         tip_allowance: "1000",
-        remaining_tip_allowance: "1",
+        remaining_allowance: "1",
       },
     };
     mockedFetch.mockResolvedValueOnce({
@@ -189,7 +189,7 @@ describe("tipDistribution", () => {
     const mockResponse = {
       allowance: {
         tip_allowance: "1000",
-        remaining_tip_allowance: "invalid",
+        remaining_allowance: "invalid",
       },
     };
     mockedFetch.mockResolvedValueOnce({
