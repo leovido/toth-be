@@ -1,6 +1,7 @@
 // ts-ignore
 import express from "express";
 import { Signer } from "../schemas/signer";
+import { fetchDegenTips } from "../degen/degenAPI";
 
 const router = express.Router();
 
@@ -57,6 +58,69 @@ router.get("/allSigners", async (_req, res, next) => {
     const allSigners = await Signer.find();
 
     res.status(200).send(allSigners);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get("/approvedSignersAllowance", async (_req, res, next) => {
+  try {
+    const allSigners: { fid: number }[] = await Signer.aggregate([
+      {
+        $match: {
+          status: "approved",
+        },
+      },
+      {
+        $project: {
+          fid: "$fid",
+        },
+      },
+    ]);
+
+    const value = await Promise.all(
+      allSigners.map((signer) => {
+        return fetchDegenTips(signer.fid).then((tips) => {
+          return {
+            fid: signer.fid,
+            tips,
+          };
+        });
+      })
+    );
+
+    res.status(200).send(value);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get("/currentPooledTips", async (_req, res, next) => {
+  try {
+    const allSigners: { fid: number }[] = await Signer.aggregate([
+      {
+        $match: {
+          status: "approved",
+        },
+      },
+      {
+        $project: {
+          fid: "$fid",
+        },
+      },
+    ]);
+
+    const pooledTips = await Promise.all(
+      allSigners.map((signer) => {
+        return fetchDegenTips(signer.fid);
+      })
+    );
+
+    const totalPooledTips = pooledTips.reduce((acc, curr) => {
+      return acc + parseFloat(curr.remainingAllowance);
+    }, 0);
+
+    res.status(200).send({ totalPooledTips });
   } catch (error) {
     next(error);
   }
