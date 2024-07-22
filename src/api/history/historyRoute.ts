@@ -1,9 +1,9 @@
 // ts-ignore
 import express, { Router, type Request, type Response } from 'express';
-import { Nomination } from '@/schemas/nomination';
 import { OpenAPIRegistry } from '@asteasolutions/zod-to-openapi';
 import { createApiResponse } from '@/api-docs/openAPIResponseBuilders';
 import { z } from 'zod';
+import { Nomination } from '../nominations/nominationModel';
 
 export const historyRegistry = new OpenAPIRegistry();
 export const historyRouter: Router = express.Router();

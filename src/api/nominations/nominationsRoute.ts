@@ -1,12 +1,12 @@
 // ts-ignore
 import express, { Router } from 'express';
 import { PipelineStage } from 'mongoose';
-import { Nomination } from '@/schemas/nomination';
+import { Nomination } from '../nominations/nominationModel';
 import { OpenAPIRegistry } from '@asteasolutions/zod-to-openapi';
 import { createApiResponse } from '@/api-docs/openAPIResponseBuilders';
 import { z } from 'zod';
 import { handleServiceResponse } from '@/common/utils/httpHandlers';
-import { nominationServiceInstance } from './nominationRepository';
+import { nominationServiceInstance } from './nominationService';
 
 export const nominationsRegistry = new OpenAPIRegistry();
 export const nominationsRouter: Router = express.Router();

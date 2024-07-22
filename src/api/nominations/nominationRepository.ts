@@ -1,8 +1,5 @@
-import { ServiceResponse } from '@/common/models/serviceResponse';
 import { Nomination, INomination } from './nominationModel';
 import { INominationRepository } from './nominationRepositoryInterface';
-import { logger } from '@/server';
-import { StatusCodes } from 'http-status-codes';
 
 export class MDNominationRepository implements INominationRepository {
   findById(id: string): Promise<unknown[]> {
@@ -59,5 +56,3 @@ export class MDNominationRepository implements INominationRepository {
     }
   }
 }
-
-export const nominationServiceInstance = new MDNominationRepository();
