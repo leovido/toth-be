@@ -11,7 +11,6 @@
     "lint": "eslint . --ext .ts --fix",
     "test": "npx jest",
     "heroku-postbuild": "npm run build",
-    "postinstall": "tsc",
     "sentry:sourcemaps": "sentry-cli sourcemaps inject --org toth-e0 --project toth-be ./dist && sentry-cli sourcemaps upload --org toth-e0 --project toth-be ./dist"
   },
   "keywords": [],

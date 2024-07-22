@@ -2,36 +2,35 @@
   "compilerOptions": {
     // Set the JavaScript version to compile to
     "target": "ES2020",
-
     // Specify module code generation
     "module": "NodeNext",
-
     "outDir": "./dist",
-
     // Specify the root directory of input files
     "rootDir": "./src",
-
     // Enable all strict type-checking options
     "strict": true,
-
     // Enables emit interoperability between CommonJS and ES Modules
     "esModuleInterop": true,
-
     // Skip type checking of declaration files
     "skipLibCheck": true,
-
     // Disallow inconsistently-cased references to the same file
     "forceConsistentCasingInFileNames": true,
-
-    "typeRoots": ["./node_modules/@types", "./types"],
+    "typeRoots": [
+      "./node_modules/@types",
+      "./types"
+    ],
     "sourceMap": true,
     "inlineSources": true,
-
     // Set `sourceRoot` to  "/" to strip the build path prefix
     // from generated source code references.
     // This improves issue grouping in Sentry.
     "sourceRoot": "/"
   },
-  "include": ["src/**/*.ts"],
-  "exclude": ["node_modules", "**/*.test.ts"] // Exclude node_modules and test files
+  "include": [
+    "src/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "**/*.test.ts"
+  ] // Exclude node_modules and test files
 }
