@@ -1,152 +1,129 @@
 // ts-ignore
-import express from "express";
-import { PipelineStage } from "mongoose";
-import { Nomination } from "../schemas/nomination";
+import express, { Router } from 'express';
+import { PipelineStage } from 'mongoose';
+import { Nomination } from '@/schemas/nomination';
+import { OpenAPIRegistry } from '@asteasolutions/zod-to-openapi';
+import { createApiResponse } from '@/api-docs/openAPIResponseBuilders';
+import { z } from 'zod';
+import { handleServiceResponse } from '@/common/utils/httpHandlers';
+import { nominationServiceInstance } from './nominationRepository';
 
-const router = express.Router();
+export const nominationsRegistry = new OpenAPIRegistry();
+export const nominationsRouter: Router = express.Router();
 
-router.post("/nominations", async (req, res, next) => {
-  const startToday = new Date();
-  startToday.setUTCHours(0, 0, 0, 0);
+nominationsRegistry.registerPath({
+  method: 'get',
+  path: '/nominations',
+  tags: ['nominations'],
+  responses: createApiResponse(z.null(), 'Success')
+});
 
-  const endToday = new Date();
-  endToday.setUTCHours(18, 0, 0, 0);
-
-  try {
-    const matches = await Nomination.aggregate([
-      {
-        $match: {
-          createdAt: { $gte: startToday, $lte: endToday },
-          fid: req.body.fid,
-        },
-      },
-      {
-        $lookup: {
-          from: "votes",
-          localField: "id",
-          foreignField: "nominationId",
-          as: "votes",
-        },
-      },
-      {
-        $addFields: {
-          votesCount: { $size: "$votes" },
-        },
-      },
-    ]);
-    if (matches.length === 0) {
-      await Nomination.validate(req.body);
-
-      const newItem = new Nomination(req.body);
-      const item = await newItem.save();
-      res.status(201).send(item);
-    } else {
-      res.status(200).send("Already nominated");
-    }
-  } catch (error) {
-    next(error);
-  }
+nominationsRouter.post('/nominations', async (req, res) => {
+  const serviceResponse = await nominationServiceInstance.createNomination(
+    req.body
+  );
+  return handleServiceResponse(serviceResponse, res);
 });
 
 // Fetches nominations by round. Useful for voting per round
-router.get("/nominationsByRound", (req, res) => {
+nominationsRouter.get('/nominationsByRound', (req, res) => {
   const roundId = req.query.roundId;
 
   const pipeline: PipelineStage[] = [
     {
       $match: {
-        roundId: roundId,
-      },
+        roundId: roundId
+      }
     },
     {
       $lookup: {
-        from: "votes",
-        localField: "id",
-        foreignField: "nominationId",
-        as: "votes",
-      },
+        from: 'votes',
+        localField: 'id',
+        foreignField: 'nominationId',
+        as: 'votes'
+      }
     },
     {
       $addFields: {
         votesCount: {
-          $size: "$votes",
-        },
-      },
+          $size: '$votes'
+        }
+      }
     },
     {
       $group: {
-        _id: "$castId",
-        document: { $first: "$$ROOT" },
-        totalVotes: { $sum: "$votesCount" },
-        weight: { $sum: "$weight" },
-      },
+        _id: '$castId',
+        document: { $first: '$$ROOT' },
+        totalVotes: { $sum: '$votesCount' },
+        weight: { $sum: '$weight' }
+      }
     },
     {
       $replaceRoot: {
         newRoot: {
           $mergeObjects: [
-            "$document",
-            { votesCount: "$totalVotes", weight: "$weight" },
-          ],
-        },
-      },
-    },
+            '$document',
+            { votesCount: '$totalVotes', weight: '$weight' }
+          ]
+        }
+      }
+    }
   ];
 
   Nomination.aggregate(pipeline)
     .sort({
       weight: -1,
-      createdAt: 1,
+      createdAt: 1
     })
     .limit(5)
     .then((nominations: unknown) => res.status(200).send(nominations))
     .catch((err: unknown) => res.status(500).send(err));
 });
 
-router.get("/nominationsById", (req, res) => {
+nominationsRouter.get('/nominationsById', (req, res) => {
   const id = req.query.id;
 
   const pipeline: PipelineStage[] = [
     {
       $match: {
         id: {
-          $eq: id,
-        },
-      },
+          $eq: id
+        }
+      }
     },
     {
       $lookup: {
-        from: "votes",
-        localField: "id",
-        foreignField: "nominationId",
-        as: "votes",
-      },
+        from: 'votes',
+        localField: 'id',
+        foreignField: 'nominationId',
+        as: 'votes'
+      }
     },
     {
       $addFields: {
         votesCount: {
-          $size: "$votes",
-        },
-      },
+          $size: '$votes'
+        }
+      }
     },
     {
       $group: {
-        _id: "$castId",
-        document: { $first: "$$ROOT" },
-        totalVotes: { $sum: "$votesCount" },
-        weight: { $sum: "$weight" },
-      },
+        _id: '$castId',
+        document: { $first: '$$ROOT' },
+        totalVotes: { $sum: '$votesCount' },
+        weight: { $sum: '$weight' }
+      }
     },
     {
       $replaceRoot: {
         newRoot: {
           $mergeObjects: [
-            "$document",
-            { votesCount: "$totalVotes", weight: "$weight" },
-          ],
-        },
-      },
-    },
+            '$document',
+            { votesCount: '$totalVotes', weight: '$weight' }
+          ]
+        }
+      }
+    }
   ];
 
   Nomination.aggregate(pipeline)
@@ -156,7 +133,7 @@ router.get("/nominationsById", (req, res) => {
 });
 
 // Fetches the current nominations for TODAY by FID
-router.get("/nominationsByFid", (req, res) => {
+nominationsRouter.get('/nominationsByFid', (req, res) => {
   const startToday = new Date();
   startToday.setUTCHours(0, 0, 0, 0);
 
@@ -170,51 +147,51 @@ router.get("/nominationsByFid", (req, res) => {
       $match: {
         createdAt: {
           $gte: startToday,
-          $lte: endToday,
+          $lte: endToday
         },
         fid: {
-          $eq: fid,
-        },
-      },
+          $eq: fid
+        }
+      }
     },
     {
       $lookup: {
-        from: "votes",
-        localField: "id",
-        foreignField: "nominationId",
-        as: "votes",
-      },
+        from: 'votes',
+        localField: 'id',
+        foreignField: 'nominationId',
+        as: 'votes'
+      }
     },
     {
       $addFields: {
         votesCount: {
-          $size: "$votes",
-        },
-      },
+          $size: '$votes'
+        }
+      }
     },
     {
       $group: {
-        _id: "$castId",
-        document: { $first: "$$ROOT" },
-        totalVotes: { $sum: "$votesCount" },
-        weight: { $sum: "$weight" },
-      },
+        _id: '$castId',
+        document: { $first: '$$ROOT' },
+        totalVotes: { $sum: '$votesCount' },
+        weight: { $sum: '$weight' }
+      }
     },
     {
       $replaceRoot: {
         newRoot: {
           $mergeObjects: [
-            "$document",
-            { votesCount: "$totalVotes", weight: "$weight" },
-          ],
-        },
-      },
-    },
+            '$document',
+            { votesCount: '$totalVotes', weight: '$weight' }
+          ]
+        }
+      }
+    }
   ];
 
   Nomination.aggregate(pipeline)
     .sort({
-      weight: -1,
+      weight: -1
     })
     .limit(1)
     .then((nominations: unknown) => res.status(200).send(nominations))
@@ -222,7 +199,7 @@ router.get("/nominationsByFid", (req, res) => {
 });
 
 // Fetches the current nominations for TODAY
-router.get("/nominations", (req, res) => {
+nominationsRouter.get('/nominations', (req, res) => {
   const startToday = new Date();
   startToday.setUTCHours(18, 0, 0, 0);
 
@@ -234,52 +211,50 @@ router.get("/nominations", (req, res) => {
       $match: {
         createdAt: {
           $gte: startToday,
-          $lte: endToday,
-        },
-      },
+          $lte: endToday
+        }
+      }
     },
     {
       $lookup: {
-        from: "votes",
-        localField: "id",
-        foreignField: "nominationId",
-        as: "votes",
-      },
+        from: 'votes',
+        localField: 'id',
+        foreignField: 'nominationId',
+        as: 'votes'
+      }
     },
     {
       $addFields: {
         votesCount: {
-          $size: "$votes",
-        },
-      },
+          $size: '$votes'
+        }
+      }
     },
     {
       $group: {
-        _id: "$castId",
-        document: { $first: "$$ROOT" },
-        totalVotes: { $sum: "$votesCount" },
-        weight: { $sum: "$weight" },
-      },
+        _id: '$castId',
+        document: { $first: '$$ROOT' },
+        totalVotes: { $sum: '$votesCount' },
+        weight: { $sum: '$weight' }
+      }
     },
     {
       $replaceRoot: {
         newRoot: {
           $mergeObjects: [
-            "$document",
-            { votesCount: "$totalVotes", weight: "$weight" },
-          ],
-        },
-      },
-    },
+            '$document',
+            { votesCount: '$totalVotes', weight: '$weight' }
+          ]
+        }
+      }
+    }
   ];
 
   Nomination.aggregate(pipeline)
     .sort({
-      votesCount: -1,
+      votesCount: -1
     })
     .limit(5)
     .then((nominations: unknown) => res.status(200).send(nominations))
     .catch((err: unknown) => res.status(500).send(err));
 });
-
-export default router;

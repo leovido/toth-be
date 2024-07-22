@@ -5,6 +5,7 @@ import { Round } from '@/schemas/round';
 import { createApiResponse } from '@/api-docs/openAPIResponseBuilders';
 import { z } from 'zod';
 import { OpenAPIRegistry } from '@asteasolutions/zod-to-openapi';
+import { handleServiceResponse } from '@/common/utils/httpHandlers';
 
 export const helpersRegistry = new OpenAPIRegistry();
 export const helpersRouter: Router = express.Router();
@@ -22,10 +23,11 @@ helpersRouter.get('/degen-tips', async (req: Request, res: Response, next) => {
     const json = await fetchDegenTips(fid);
     const { remainingAllowance, allowance } = json;
 
-    res.status(200).send({
+    const serviceResponse = {
       remainingAllowance,
       allowance
-    });
+    };
+    handleServiceResponse(serviceResponse, res);
   } catch (error) {
     next(error);
   }

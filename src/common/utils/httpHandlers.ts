@@ -5,7 +5,8 @@ import type { ZodError, ZodSchema } from 'zod';
 import { ServiceResponse } from '@/common/models/serviceResponse';
 
 export const handleServiceResponse = (
-  serviceResponse: ServiceResponse<unknown>,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  serviceResponse: ServiceResponse<any>,
   response: Response
 ) => {
   return response.status(serviceResponse.statusCode).send(serviceResponse);

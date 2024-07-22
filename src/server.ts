@@ -14,12 +14,15 @@ import express, { Response } from 'express';
 import mongoose from 'mongoose';
 import path from 'path';
 
-import { healthCheckRouter } from './api/healthCheck/healthCheckRouter';
-import { helpersRouter } from '@/api/helpers/helpersRoute';
 import { cannonCronJob } from './cannon';
 import { setupCronJobs } from './cronjobs';
-import { openAPIRouter } from './api-docs/openAPIRouter';
+import { openAPIRouter } from '@/api-docs/openAPIRouter';
+import { signersRouter } from '@/api/nominations/nominationsRoute';
+import { helpersRouter } from '@/api/helpers/helpersRoute';
+import { healthCheckRouter } from '@/api/healthCheck/healthCheckRouter';
+
 import pino from 'pino';
+import { historyRouter } from './api/history/historyRoute';
 
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
@@ -30,8 +33,8 @@ app.use(bodyParser.json());
 
 // Routes
 app.use('/health-check', healthCheckRouter);
-// app.use('/users', userRouter);
-// app.use('/signers', signersRoutes);
+app.use('/signers', signersRouter);
+app.use('/history', historyRouter);
 // app.use('/round', roundRoutes);
 // app.use('/votes', votesRoutes);
 // app.use('/nominations', nominationsRoutes);
