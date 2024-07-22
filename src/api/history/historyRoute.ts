@@ -1,13 +1,24 @@
 // ts-ignore
-import express from "express";
-import { Nomination } from "../schemas/nomination";
+import express, { Router, type Request, type Response } from 'express';
+import { Nomination } from '@/schemas/nomination';
+import { OpenAPIRegistry } from '@asteasolutions/zod-to-openapi';
+import { createApiResponse } from '@/api-docs/openAPIResponseBuilders';
+import { z } from 'zod';
 
-const router = express.Router();
+export const historyRegistry = new OpenAPIRegistry();
+export const historyRouter: Router = express.Router();
 
-router.get("/history", async (req, res, next) => {
+historyRegistry.registerPath({
+  method: 'get',
+  path: '/history',
+  tags: ['History'],
+  responses: createApiResponse(z.null(), 'Success')
+});
+
+historyRouter.get('/history', async (req: Request, res: Response, next) => {
   try {
     const nominations = await Nomination.find({
-      fid: { $eq: req.query.fid },
+      fid: { $eq: req.query.fid }
     }).limit(5);
 
     res.status(200).send(nominations);
@@ -16,12 +27,12 @@ router.get("/history", async (req, res, next) => {
   }
 });
 
-router.get("/history", async (req, res, next) => {
+historyRouter.get('/history', async (req: Request, res: Response, next) => {
   try {
     const nominations = await Nomination.find({
       fid: {
-        $eq: req.query.fid,
-      },
+        $eq: req.query.fid
+      }
     });
 
     res.json(nominations);
@@ -29,5 +40,3 @@ router.get("/history", async (req, res, next) => {
     next(error);
   }
 });
-
-export default router;

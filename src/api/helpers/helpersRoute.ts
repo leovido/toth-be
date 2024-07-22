@@ -1,5 +1,5 @@
 // ts-ignore
-import express, { Router } from 'express';
+import express, { Router, type Request, type Response } from 'express';
 import { fetchDegenTips } from '@/degen/degenAPI';
 import { Round } from '@/schemas/round';
 import { createApiResponse } from '@/api-docs/openAPIResponseBuilders';
@@ -16,7 +16,7 @@ helpersRegistry.registerPath({
   responses: createApiResponse(z.null(), 'Success')
 });
 
-helpersRouter.get('/degen-tips', async (req, res, next) => {
+helpersRouter.get('/degen-tips', async (req: Request, res: Response, next) => {
   try {
     const fid = Number(req.query.fid);
     const json = await fetchDegenTips(fid);
@@ -31,7 +31,7 @@ helpersRouter.get('/degen-tips', async (req, res, next) => {
   }
 });
 
-helpersRouter.get('/current-period', async (req, res, next) => {
+helpersRouter.get('/current-period', async (req, res: Response, next) => {
   try {
     const now = new Date();
 
