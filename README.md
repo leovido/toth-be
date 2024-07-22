@@ -1,5 +1,7 @@
 <!-- Improved compatibility of back to top link: See: https://github.com/othneildrew/Best-README-Template/pull/73 -->
+
 <a id="readme-top"></a>
+
 <!--
 *** Thanks for checking out the Best-README-Template. If you have a suggestion
 *** that would make this better, please fork the repo and create a pull request
@@ -20,8 +22,8 @@
   </p>
 </div>
 
-
 <!-- ABOUT THE PROJECT -->
+
 ## About The Project
 
 Tip O' The Hat: Pool Tips, Fund Awesomeness - A community initiative on Farcaster to promote & reward exceptional casts by pooling tips & conferring them to deserving creators incentivising quality & community.
@@ -35,29 +37,34 @@ The top five nominated casts proceed to voting. Power badge holders (only) can v
 Tips go to the cast creator. If the creator tags others, the tip is split equally. Roadmap: allow casters to specify percentage splits.
 
 <!-- GETTING STARTED -->
+
 ## Getting Started
 
 ### Installation
 
 1. Clone the repo
+
 ```sh
 git clone https://github.com/leovido/toth-be.git
 ```
+
 2. To run the app, run the following
-  ```sh
-  npm i && nodemon
-  ```
-3. You will also need the following `.env` variables. Make sure to set up MongoDB on your end. 
 
-  ```
-  DB_INSTANCE="mongodb://localhost:27017/tipothehat"
-  PORT=3011
-  PUBLIC_URL="http://localhost:3011"
-  NEYNAR_API_KEY=NEYNAR_API_DOCS
-  ```
+```sh
+npm i && nodemon
+```
 
+3. You will also need the following `.env` variables. Make sure to set up MongoDB on your end.
+
+```
+DB_INSTANCE="mongodb://localhost:27017/tipothehat"
+PORT=3011
+PUBLIC_URL="http://localhost:8080"
+NEYNAR_API_KEY=NEYNAR_API_DOCS
+```
 
 <!-- CONTRIBUTING -->
+
 ## Contributing
 
 Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
@@ -71,14 +78,14 @@ Don't forget to give the project a star! Thanks again!
 4. Push to the Branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
 
-
 <!-- LICENSE -->
+
 ## License
 
 See `LICENSE.txt` for more information.
 
-
 <!-- CONTACT -->
+
 ## Contact
 
 Leovido - [@warpcast handle](https://warpcast.com/leovido.eth) - toth.jazz924@passinbox.com
