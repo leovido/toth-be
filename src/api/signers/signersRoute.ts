@@ -1,113 +1,86 @@
 // ts-ignore
-import express from "express";
-import { Signer } from "../schemas/signer";
-import { fetchDegenTips } from "../degen/degenAPI";
+import express from 'express';
+import { Signer } from '../schemas/signer';
+import { fetchDegenTips } from '../degen/degenAPI';
+import { handleServiceResponse } from '@/common/utils/httpHandlers';
+import { signerServiceInstance } from './signersService';
+import { ServiceResponse } from '@/common/models/serviceResponse';
+import { StatusCodes } from 'http-status-codes';
 
 const router = express.Router();
 
-router.get("/signers", async (req, res, next) => {
-  try {
-    const signer = await Signer.findOne({
-      public_key: { $eq: req.query.publicKey },
-    });
-
-    if (signer) {
-      res.status(200).send(signer);
-    } else {
-      res.status(404).json({ error: "Signer not found" });
-    }
-  } catch (error) {
-    next(error);
-  }
-});
-
-router.get("/signerByUUID", async (req, res, next) => {
-  try {
-    const signer = await Signer.findOne({
-      signer_uuid: { $eq: req.query.signerUUID },
-    });
-
-    if (signer) {
-      res.status(200).send(signer);
-    } else {
-      res.status(404).json({ error: "Signer not found" });
-    }
-  } catch (error) {
-    next(error);
-  }
-});
-
-router.get("/signersByFid", async (req, res, next) => {
-  try {
-    const signer = await Signer.findOne({
-      fid: { $eq: req.query.fid },
-    });
-
-    if (signer) {
-      res.status(200).send(signer);
-    } else {
-      res.status(404).json({ error: "Signer not found" });
-    }
-  } catch (error) {
-    next(error);
-  }
-});
-
-router.get("/allSigners", async (_req, res, next) => {
-  try {
-    const allSigners = await Signer.find();
-
-    res.status(200).send(allSigners);
-  } catch (error) {
-    next(error);
-  }
-});
-
-router.get("/approvedSignersAllowance", async (_req, res, next) => {
-  try {
-    const allSigners: { fid: number }[] = await Signer.aggregate([
-      {
-        $match: {
-          status: "approved",
-        },
-      },
-      {
-        $project: {
-          fid: "$fid",
-        },
-      },
-    ]);
-
-    const value = await Promise.all(
-      allSigners.map((signer) => {
-        return fetchDegenTips(signer.fid).then((tips) => {
-          return {
-            fid: signer.fid,
-            tips,
-          };
-        });
-      })
+router.get('/signerByPublicKey', async (req, res) => {
+  if (typeof req.query.publicKey === 'string') {
+    const serviceResponse = await signerServiceInstance.findByPublicKey(
+      req.query.publicKey
     );
 
-    res.status(200).send(value);
-  } catch (error) {
-    next(error);
+    return handleServiceResponse(serviceResponse, res);
+  } else {
+    return handleServiceResponse(
+      ServiceResponse.failure(
+        'Invalid public key',
+        null,
+        StatusCodes.BAD_REQUEST
+      ),
+      res
+    );
   }
 });
 
-router.get("/currentPooledTips", async (_req, res, next) => {
+router.get('/signerByUUID', async (req, res) => {
+  if (typeof req.query.signerUUID === 'string') {
+    const serviceResponse = await signerServiceInstance.findByUUID(
+      req.query.signerUUID
+    );
+
+    return handleServiceResponse(serviceResponse, res);
+  } else {
+    return handleServiceResponse(
+      ServiceResponse.failure(
+        'Invalid signerUUID',
+        null,
+        StatusCodes.BAD_REQUEST
+      ),
+      res
+    );
+  }
+});
+
+router.get('/signersByFid', async (req, res) => {
+  const serviceResponse = await signerServiceInstance.findByFid(
+    Number(req.query.fid)
+  );
+
+  return handleServiceResponse(serviceResponse, res);
+});
+
+router.get('/allSigners', async (_req, res) => {
+  const serviceResponse = await signerServiceInstance.findAll();
+
+  return handleServiceResponse(serviceResponse, res);
+});
+
+router.get('/approvedSignersAllowance', async (_req, res) => {
+  const serviceResponse =
+    await signerServiceInstance.fetchApprovedSignersAllowance();
+
+  handleServiceResponse(serviceResponse, res);
+});
+
+router.get('/currentPooledTips', async (_req, res, next) => {
   try {
     const allSigners: { fid: number }[] = await Signer.aggregate([
       {
         $match: {
-          status: "approved",
-        },
+          status: 'approved'
+        }
       },
       {
         $project: {
-          fid: "$fid",
-        },
-      },
+          fid: '$fid'
+        }
+      }
     ]);
 
     const pooledTips = await Promise.all(
@@ -126,7 +99,7 @@ router.get("/currentPooledTips", async (_req, res, next) => {
   }
 });
 
-router.post("/signers", async (req, res, next) => {
+router.post('/signers', async (req, res, next) => {
   try {
     await Signer.validate(req.body);
 
@@ -139,17 +112,17 @@ router.post("/signers", async (req, res, next) => {
   }
 });
 
-router.post("/updateSigner", async (req, res, next) => {
+router.post('/updateSigner', async (req, res, next) => {
   try {
     const signer = await Signer.findOne({
-      signer_uuid: { $eq: req.body.signerUUID },
+      signer_uuid: { $eq: req.body.signerUUID }
     });
 
     const _updatedSigner = {
       ...signer?.toJSON(),
       signer_uuid: req.body.signerUUID,
       status: req.body.status,
-      fid: req.body.fid,
+      fid: req.body.fid
     };
 
     const updatedSigner = new Signer(_updatedSigner);

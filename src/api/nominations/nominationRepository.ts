@@ -1,9 +1,16 @@
 import { PipelineStage } from 'mongoose';
 import { Nomination, INomination } from './nominationModel';
-import { INominationRepository } from './nominationRepositoryInterface';
+
+export interface INominationRepository {
+  findById(id: string): Promise<INomination[]>;
+  findByFid(fid: number): Promise<INomination[]>;
+  findByRound(roundId: string): Promise<INomination[]>;
+  findTodaysNominations(): Promise<INomination[]>;
+  createNomination(nomination: INomination): Promise<INomination | null>;
+}
 
 export class MDNominationRepository implements INominationRepository {
-  async findById(id: string): Promise<unknown[]> {
+  async findById(id: string) {
     const pipeline: PipelineStage[] = [
       {
         $match: {
@@ -52,7 +59,7 @@ export class MDNominationRepository implements INominationRepository {
     return nominations;
   }
 
-  async findByFid(fid: number): Promise<unknown[]> {
+  async findByFid(fid: number) {
     const startToday = new Date();
     startToday.setUTCHours(0, 0, 0, 0);
 
@@ -115,7 +122,7 @@ export class MDNominationRepository implements INominationRepository {
     return nominations;
   }
 
-  async findByRound(roundId: string): Promise<unknown[]> {
+  async findByRound(roundId: string) {
     const pipeline: PipelineStage[] = [
       {
         $match: {
@@ -167,7 +174,7 @@ export class MDNominationRepository implements INominationRepository {
     return nominations;
   }
 
-  async findTodaysNominations(): Promise<unknown[]> {
+  async findTodaysNominations() {
     const startToday = new Date();
     startToday.setUTCHours(18, 0, 0, 0);
 

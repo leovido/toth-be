@@ -55,18 +55,15 @@ mongoose.connect(process.env.DB_INSTANCE ?? '').then(async () => {
 });
 
 const db = mongoose.connection;
-db.on('error', console.error.bind(console, 'connection error:'));
+db.on('error', logger.error.bind(console, 'connection error:'));
 db.once('open', function () {
-  console.log('Connected successfully to MongoDB');
+  logger.info('Connected successfully to MongoDB');
 });
 
-// The error handler must be registered before any other error middleware and after all controllers
 Sentry.setupExpressErrorHandler(app);
 
 // Optional fallthrough error handler
 app.use(function onError(err: unknown, res: Response) {
-  // The error id is attached to `res.sentry` to be returned
-  // and optionally displayed to the user for support.
   res.statusCode = 500;
   res.end(`${err}\n`);
 });
