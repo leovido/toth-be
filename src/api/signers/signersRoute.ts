@@ -1,7 +1,6 @@
 // ts-ignore
 import express from 'express';
-import { Signer } from '../schemas/signer';
-import { fetchDegenTips } from '../degen/degenAPI';
+import { Signer } from '../signers/signersModel';
 import { handleServiceResponse } from '@/common/utils/httpHandlers';
 import { signerServiceInstance } from './signersService';
 import { ServiceResponse } from '@/common/models/serviceResponse';
@@ -68,45 +67,22 @@ router.get('/approvedSignersAllowance', async (_req, res) => {
   handleServiceResponse(serviceResponse, res);
 });
 
-router.get('/currentPooledTips', async (_req, res, next) => {
-  try {
-    const allSigners: { fid: number }[] = await Signer.aggregate([
-      {
-        $match: {
-          status: 'approved'
-        }
-      },
-      {
-        $project: {
-          fid: '$fid'
-        }
-      }
-    ]);
+router.get('/currentPooledTips', async (_req, res) => {
+  const serviceResponse = await signerServiceInstance.fetchCurrentPooledTips();
 
-    const pooledTips = await Promise.all(
-      allSigners.map((signer) => {
-        return fetchDegenTips(signer.fid);
-      })
-    );
-
-    const totalPooledTips = pooledTips.reduce((acc, curr) => {
-      return acc + parseFloat(curr.remainingAllowance);
-    }, 0);
-
-    res.status(200).send({ totalPooledTips });
-  } catch (error) {
-    next(error);
-  }
+  handleServiceResponse(serviceResponse, res);
 });
 
 router.post('/signers', async (req, res, next) => {
   try {
-    await Signer.validate(req.body);
+    if (req.body) {
+      await Signer.validate(req.body);
+      const serviceResponse = await signerServiceInstance.createSigner(
+        req.body
+      );
 
-    const newItem = new Signer(req.body);
-    const item = await newItem.save();
-
-    res.status(201).send(item);
+      handleServiceResponse(serviceResponse, res);
+    }
   } catch (error) {
     next(error);
   }

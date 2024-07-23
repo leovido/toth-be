@@ -1,26 +1,26 @@
 // ts-ignore
-import express from "express";
-import { Vote } from "../schemas/vote";
-import { Round } from "../schemas/round";
+import express from 'express';
+import { Vote } from '../../schemas/vote';
+import { Round } from '../rounds/roundsModel';
 
 const router = express.Router();
 
-router.post("/votes", async (req, res, next) => {
+router.post('/votes', async (req, res, next) => {
   try {
     const { roundId, fid } = req.body;
     const round = await Round.findOne({
-      id: roundId,
+      id: roundId
     });
 
     if (round === null) {
-      return res.status(400).send({ error: "Round not found" });
+      return res.status(400).send({ error: 'Round not found' });
     }
 
     const now = new Date();
     if (now < round.votingStartTime || now > round.votingEndTime) {
       return res
         .status(400)
-        .send({ error: "Voting is not currently allowed for this round." });
+        .send({ error: 'Voting is not currently allowed for this round.' });
     }
 
     Vote.aggregate([
@@ -28,13 +28,13 @@ router.post("/votes", async (req, res, next) => {
         $match: {
           roundId: roundId,
           createdAt: { $gte: now },
-          fid: fid,
-        },
-      },
+          fid: fid
+        }
+      }
     ])
       .then((votes: unknown[]) => {
         if (votes.length > 0) {
-          return res.status(400).send({ error: "You already voted" });
+          return res.status(400).send({ error: 'You already voted' });
         } else {
           const newItem = new Vote(req.body);
           newItem.validateSync();
@@ -50,9 +50,9 @@ router.post("/votes", async (req, res, next) => {
   }
 });
 
-router.get("/votes", (req, res) => {
+router.get('/votes', (req, res) => {
   Vote.find({
-    roundId: req.query.roundId,
+    roundId: req.query.roundId
   })
     .then((votes: unknown) => res.status(200).send(votes))
     .catch((err: unknown) => res.status(500).send(err));

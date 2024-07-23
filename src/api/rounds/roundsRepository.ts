@@ -1,6 +1,5 @@
-import { Round } from '@/schemas/round';
 import cryptoModule from 'crypto';
-import { IRound } from './roundsModel';
+import { IRound, Round } from './roundsModel';
 
 export interface IRoundRepository {
   findAll(): Promise<IRound[]>;

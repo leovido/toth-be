@@ -3,7 +3,8 @@ import { StatusCodes } from 'http-status-codes';
 import { ServiceResponse } from '@/common/models/serviceResponse';
 import { logger } from '@/server';
 import { SignersRepository } from './signersRepository';
-import { ISigner } from './signersModel';
+import { ISigner, Signer } from './signersModel';
+import { fetchDegenTips } from '@/degen/degenAPI';
 
 export class SignersService {
   private signersRepository: SignersRepository;
@@ -131,6 +132,50 @@ export class SignersService {
         null,
         StatusCodes.INTERNAL_SERVER_ERROR
       );
+    }
+  }
+
+  async fetchCurrentPooledTips() {
+    try {
+      const allSigners: { fid: number }[] = await Signer.aggregate([
+        {
+          $match: {
+            status: 'approved'
+          }
+        },
+        {
+          $project: {
+            fid: '$fid'
+          }
+        }
+      ]);
+
+      const pooledTips = await Promise.all(
+        allSigners.map((signer) => {
+          return fetchDegenTips(signer.fid);
+        })
+      );
+
+      const totalPooledTips = pooledTips.reduce((acc, curr) => {
+        return acc + parseFloat(curr.remainingAllowance);
+      }, 0);
+
+      return ServiceResponse.success<unknown>('Signer found', {
+        totalPooledTips
+      });
+    } catch (error) {
+      throw new Error(`Error: ${(error as Error).message}`);
+    }
+  }
+
+  async createSigner(signer: ISigner) {
+    try {
+      const newItem = new Signer(signer);
+      const item = await newItem.save();
+
+      return ServiceResponse.success<unknown>('Signer created', item);
+    } catch (error) {
+      throw new Error(`Error: ${(error as Error).message}`);
     }
   }
 }

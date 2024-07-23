@@ -1,8 +1,8 @@
-import cron from "node-cron";
-import { Round } from "./schemas/round";
-import cryptoModule from "crypto";
-import { client } from "./neynar/client";
-import * as Sentry from "@sentry/node";
+import cron from 'node-cron';
+import cryptoModule from 'crypto';
+import { client } from './neynar/client';
+import * as Sentry from '@sentry/node';
+import { Round } from './api/rounds/roundsModel';
 
 // Function to update rounds
 const updateRounds = async () => {
@@ -11,17 +11,17 @@ const updateRounds = async () => {
   try {
     const rounds = await Round.find({
       $or: [
-        { status: "nominating", nominationEndTime: { $lte: now } },
-        { status: "voting", votingEndTime: { $lte: now } },
-      ],
+        { status: 'nominating', nominationEndTime: { $lte: now } },
+        { status: 'voting', votingEndTime: { $lte: now } }
+      ]
     });
 
     for (const round of rounds) {
-      if (round.status === "nominating" && now >= round.nominationEndTime) {
-        round.status = "voting";
+      if (round.status === 'nominating' && now >= round.nominationEndTime) {
+        round.status = 'voting';
         round.votingStartTime = now;
-      } else if (round.status === "voting") {
-        round.status = "completed";
+      } else if (round.status === 'voting') {
+        round.status = 'completed';
         round.winner = await saveWinner(round.id);
       }
 
@@ -52,8 +52,8 @@ const createNewRound = async () => {
     votingStartTime: nominationEndTime,
     votingEndTime,
     createdAt: new Date(),
-    status: "nominating",
-    winner: "",
+    status: 'nominating',
+    winner: ''
   });
 
   try {
@@ -84,28 +84,28 @@ export const saveWinner = async (roundId: string): Promise<string> => {
 
       const cast = await client.lookUpCastByHashOrWarpcastUrl(
         `https://warpcast.com/${castWinner.username}/${castWinner.castId}`,
-        "url"
+        'url'
       );
 
       return cast.cast.hash;
     } else {
-      return "";
+      return '';
     }
   } catch (error) {
-    console.error("Error fetching cast winner:", error);
-    return "";
+    console.error('Error fetching cast winner:', error);
+    return '';
   }
 };
 
 // Export the cron job setup function
 export const setupCronJobs = async () => {
-  cron.schedule("0 0 * * *", async () => {
+  cron.schedule('0 0 * * *', async () => {
     await createNewRound();
-    Sentry.captureMessage("Updating rounds: 12 AM UTC");
+    Sentry.captureMessage('Updating rounds: 12 AM UTC');
   });
 
-  cron.schedule("0 18 * * *", async () => {
+  cron.schedule('0 18 * * *', async () => {
     await updateRounds();
-    Sentry.captureMessage("Updating rounds: 6 PM UTC");
+    Sentry.captureMessage('Updating rounds: 6 PM UTC');
   });
 };

@@ -1,5 +1,5 @@
 import { fetchDegenTips } from '@/degen/degenAPI';
-import { Round } from '@/schemas/round';
+import { Round } from '../rounds/roundsModel';
 
 export interface IHelperRepository {
   fetchDegenTips(
