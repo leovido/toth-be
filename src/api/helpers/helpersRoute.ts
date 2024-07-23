@@ -1,6 +1,5 @@
 // ts-ignore
 import express, { Router, type Request, type Response } from 'express';
-import { fetchDegenTips } from '@/degen/degenAPI';
 import { Round } from '@/schemas/round';
 import { createApiResponse } from '@/api-docs/openAPIResponseBuilders';
 import { z } from 'zod';
@@ -31,19 +30,10 @@ helpersRouter.get('/degen-tips', async (req: Request, res: Response, next) => {
 
 helpersRouter.get('/current-period', async (req, res: Response, next) => {
   try {
-    const now = new Date();
-
-    const rounds = await Round.find({
-      $or: [
-        {
-          nominationEndTime: { $gte: now },
-          nominationStartTime: { $lte: now }
-        },
-        { votingEndTime: { $gte: now }, votingStartTime: { $lte: now } }
-      ]
-    });
-
-    res.json(rounds);
+    const serviceResponse = await helperServiceInstance.fetchCurrentPeriod(
+      new Date()
+    );
+    handleServiceResponse(serviceResponse, res);
   } catch (error) {
     next(error);
   }

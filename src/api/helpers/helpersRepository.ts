@@ -1,37 +1,47 @@
-import type { User } from '@/api/user/userModel';
+import { fetchDegenTips } from '@/degen/degenAPI';
+import { Round } from '@/schemas/round';
 
-export const users: User[] = [
-  {
-    id: 1,
-    name: 'Alice',
-    email: 'alice@example.com',
-    age: 42,
-    createdAt: new Date(),
-    updatedAt: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000) // 5 days later
-  },
-  {
-    id: 2,
-    name: 'Robert',
-    email: 'Robert@example.com',
-    age: 21,
-    createdAt: new Date(),
-    updatedAt: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000) // 5 days later
+export interface IHelperRepository {
+  fetchDegenTips(
+    fid: number
+  ): Promise<{ remainingAllowance: string; allowance: string }>;
+  fetchCurrentPeriod(date: Date): Promise<unknown>;
+}
+
+export class HelperRepository implements IHelperRepository {
+  async fetchCurrentPeriod(date: Date) {
+    try {
+      const now = date;
+      const rounds = await Round.find({
+        $or: [
+          {
+            nominationEndTime: { $gte: now },
+            nominationStartTime: { $lte: now }
+          },
+          { votingEndTime: { $gte: now }, votingStartTime: { $lte: now } }
+        ]
+      });
+
+      return rounds;
+    } catch (error) {
+      throw new Error(
+        `Error fetching current period: ${(error as Error).message}`
+      );
+    }
   }
-];
+  async fetchDegenTips(fid: number) {
+    try {
+      const json = await fetchDegenTips(fid);
+      const { remainingAllowance, allowance } = json;
 
-export class HelperRepository {
-  async fetchDegenTips(fid: number): Promise<unknown> {
-    const fid = Number(req.query.fid);
-    const json = await fetchDegenTips(fid);
-    const { remainingAllowance, allowance } = json;
+      const tipsResponse = {
+        remainingAllowance,
+        allowance
+      };
 
-    const serviceResponse = {
-      remainingAllowance,
-      allowance
-    };
-  }
-
-  async findByIdAsync(id: number): Promise<User | null> {
-    return users.find((user) => user.id === id) || null;
+      return tipsResponse;
+    } catch (error) {
+      throw new Error(`Error fetching degen tips: ${(error as Error).message}`);
+    }
   }
 }
