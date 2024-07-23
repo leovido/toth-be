@@ -17,7 +17,7 @@ import path from 'path';
 import { cannonCronJob } from './cannon';
 import { setupCronJobs } from './cronjobs';
 import { openAPIRouter } from '@/api-docs/openAPIRouter';
-import { signersRouter } from '@/api/nominations/nominationsRoute';
+import { nominationsRouter } from '@/api/nominations/nominationsRouter';
 import { helpersRouter } from '@/api/helpers/helpersRouter';
 import { healthCheckRouter } from '@/api/healthCheck/healthCheckRouter';
 
@@ -37,7 +37,7 @@ app.use('/health-check', healthCheckRouter);
 // app.use('/history', historyRouter);
 // app.use('/round', roundRoutes);
 // app.use('/votes', votesRoutes);
-// app.use('/nominations', nominationsRoutes);
+app.use('/nominations', nominationsRouter);
 // app.use('/history', historyRoutes);
 app.use('/helpers', helpersRouter);
 

@@ -5,9 +5,14 @@ import {
 
 import { healthCheckRegistry } from '@/api/healthCheck/healthCheckRouter';
 import { helpersRegistry } from '@/api/helpers/helpersRouter';
+import { nominationsRegistry } from '@/api/nominations/nominationsRouter';
 
 export function generateOpenAPIDocument() {
-  const registry = new OpenAPIRegistry([healthCheckRegistry, helpersRegistry]);
+  const registry = new OpenAPIRegistry([
+    healthCheckRegistry,
+    helpersRegistry,
+    nominationsRegistry
+  ]);
   const generator = new OpenApiGeneratorV3(registry.definitions);
 
   return generator.generateDocument({
