@@ -1,11 +1,11 @@
 // ts-ignore
-import express, { Router } from 'express';
-import { OpenAPIRegistry } from '@asteasolutions/zod-to-openapi';
 import { createApiResponse } from '@/api-docs/openAPIResponseBuilders';
-import { z } from 'zod';
-import { handleServiceResponse } from '@/common/utils/httpHandlers';
-import { nominationServiceInstance } from './nominationService';
 import { ServiceResponse } from '@/common/models/serviceResponse';
+import { handleServiceResponse } from '@/common/utils/httpHandlers';
+import { OpenAPIRegistry } from '@asteasolutions/zod-to-openapi';
+import express, { Router } from 'express';
+import { z } from 'zod';
+import { nominationServiceInstance } from './nominationService';
 
 export const nominationsRegistry = new OpenAPIRegistry();
 export const nominationsRouter: Router = express.Router();
