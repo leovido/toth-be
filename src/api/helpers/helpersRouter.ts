@@ -1,6 +1,5 @@
 // ts-ignore
 import express, { Router, type Request, type Response } from 'express';
-import { Round } from '@/schemas/round';
 import { createApiResponse } from '@/api-docs/openAPIResponseBuilders';
 import { z } from 'zod';
 import { OpenAPIRegistry } from '@asteasolutions/zod-to-openapi';
@@ -10,10 +9,32 @@ import { helperServiceInstance } from './helpersService';
 export const helpersRegistry = new OpenAPIRegistry();
 export const helpersRouter: Router = express.Router();
 
+const degenTipsResponseSchema = z.object({
+  remainingAllowance: z.string(),
+  allowance: z.string()
+});
+
 helpersRegistry.registerPath({
   method: 'get',
-  path: '/helpers',
+  path: '/helpers/degen-tips',
   tags: ['Helpers'],
+  summary: 'Fetch Degen Tips',
+  responses: createApiResponse(degenTipsResponseSchema, 'Success'),
+  parameters: [
+    {
+      name: 'fid',
+      in: 'query',
+      required: true,
+      schema: { type: 'integer' }
+    }
+  ]
+});
+
+helpersRegistry.registerPath({
+  method: 'get',
+  path: '/helpers/current-period',
+  tags: ['Helpers'],
+  summary: 'Fetch Current Period',
   responses: createApiResponse(z.null(), 'Success')
 });
 

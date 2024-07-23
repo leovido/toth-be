@@ -11,6 +11,25 @@ export class HelperService {
     this.helperRepository = repository;
   }
 
+  async fetchCurrentPeriod(
+    date: Date
+  ): Promise<ServiceResponse<unknown | null>> {
+    try {
+      const item = await this.helperRepository.fetchCurrentPeriod(date);
+      return ServiceResponse.success<unknown>('Current period fetched', item);
+    } catch (ex) {
+      const errorMessage = `Error fetching current period: ${
+        (ex as Error).message
+      }`;
+      logger.error(errorMessage);
+      return ServiceResponse.failure(
+        'An error occurred while fetching current period.',
+        null,
+        StatusCodes.INTERNAL_SERVER_ERROR
+      );
+    }
+  }
+
   async fetchDegenTips(fid: number): Promise<ServiceResponse<unknown | null>> {
     try {
       const item = await this.helperRepository.fetchDegenTips(fid);

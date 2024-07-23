@@ -5,6 +5,7 @@ export interface IHelperRepository {
   fetchDegenTips(
     fid: number
   ): Promise<{ remainingAllowance: string; allowance: string }>;
+
   fetchCurrentPeriod(date: Date): Promise<unknown>;
 }
 
