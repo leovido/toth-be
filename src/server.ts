@@ -23,6 +23,7 @@ import { roundsRouter } from './api/rounds/roundsRouter';
 import { healthCheckRouter } from '@/api/healthCheck/healthCheckRouter';
 
 import pino from 'pino';
+import { historyRouter } from './api/history/historyRoute';
 
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
@@ -34,7 +35,7 @@ app.use(bodyParser.json());
 // Routes
 app.use('/health-check', healthCheckRouter);
 // app.use('/signers', signersRouter);
-// app.use('/history', historyRouter);
+app.use('/history', historyRouter);
 app.use('/round', roundsRouter);
 // app.use('/votes', votesRoutes);
 app.use('/nominations', nominationsRouter);

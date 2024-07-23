@@ -10,7 +10,7 @@ export const historyRouter: Router = express.Router();
 
 historyRegistry.registerPath({
   method: 'get',
-  path: '/history',
+  path: '/history/history',
   tags: ['History'],
   responses: createApiResponse(z.null(), 'Success')
 });
@@ -22,20 +22,6 @@ historyRouter.get('/history', async (req: Request, res: Response, next) => {
     }).limit(5);
 
     res.status(200).send(nominations);
-  } catch (error) {
-    next(error);
-  }
-});
-
-historyRouter.get('/history', async (req: Request, res: Response, next) => {
-  try {
-    const nominations = await Nomination.find({
-      fid: {
-        $eq: req.query.fid
-      }
-    });
-
-    res.json(nominations);
   } catch (error) {
     next(error);
   }

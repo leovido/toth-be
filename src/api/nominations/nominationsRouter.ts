@@ -12,7 +12,7 @@ export const nominationsRouter: Router = express.Router();
 
 nominationsRegistry.registerPath({
   method: 'get',
-  path: '/nominations/nominations',
+  path: 'nominations/nominations',
   tags: ['nominations'],
   responses: createApiResponse(z.null(), 'Success')
 });

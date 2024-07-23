@@ -1,14 +1,81 @@
 // ts-ignore
-import express from 'express';
+import express, { Router } from 'express';
 import { Signer } from '../signers/signersModel';
 import { handleServiceResponse } from '@/common/utils/httpHandlers';
 import { signerServiceInstance } from './signersService';
 import { ServiceResponse } from '@/common/models/serviceResponse';
 import { StatusCodes } from 'http-status-codes';
+import { OpenAPIRegistry } from '@asteasolutions/zod-to-openapi';
+import { createApiResponse } from '@/api-docs/openAPIResponseBuilders';
+import { z } from 'zod';
 
-const router = express.Router();
+export const signersRegistry = new OpenAPIRegistry();
+export const signersRouter: Router = express.Router();
 
-router.get('/signerByPublicKey', async (req, res) => {
+signersRegistry.registerPath({
+  method: 'get',
+  path: 'signers/signerByUUID',
+  tags: ['signers'],
+  responses: createApiResponse(z.null(), 'Success')
+});
+
+signersRegistry.registerPath({
+  method: 'get',
+  path: 'signers/signersByFid',
+  tags: ['signers'],
+  responses: createApiResponse(z.null(), 'Success')
+});
+
+signersRegistry.registerPath({
+  method: 'get',
+  path: 'signers/allSigners',
+  tags: ['signers'],
+  responses: createApiResponse(z.null(), 'Success')
+});
+
+signersRegistry.registerPath({
+  method: 'get',
+  path: 'signers/approvedSignersAllowance',
+  tags: ['signers'],
+  responses: createApiResponse(z.null(), 'Success')
+});
+
+signersRegistry.registerPath({
+  method: 'get',
+  path: 'signers/currentPooledTips',
+  tags: ['signers'],
+  responses: createApiResponse(z.null(), 'Success')
+});
+
+signersRegistry.registerPath({
+  method: 'post',
+  path: 'signers/signers',
+  tags: ['signers'],
+  requestBody: {
+    content: {
+      'application/json': {
+        schema: { type: 'object' }
+      }
+    }
+  },
+  responses: createApiResponse(z.null(), 'Success')
+});
+
+signersRegistry.registerPath({
+  method: 'post',
+  path: 'signers/updateSigner',
+  tags: ['signers'],
+  requestBody: {
+    content: {
+      'application/json': {
+        schema: { type: 'object' }
+      }
+    }
+  },
+  responses: createApiResponse(z.null(), 'Success')
+});
+
+signersRouter.get('/signerByPublicKey', async (req, res) => {
   if (typeof req.query.publicKey === 'string') {
     const serviceResponse = await signerServiceInstance.findByPublicKey(
       req.query.publicKey
@@ -27,7 +94,7 @@ router.get('/signerByPublicKey', async (req, res) => {
   }
 });
 
-router.get('/signerByUUID', async (req, res) => {
+signersRouter.get('/signerByUUID', async (req, res) => {
   if (typeof req.query.signerUUID === 'string') {
     const serviceResponse = await signerServiceInstance.findByUUID(
       req.query.signerUUID
@@ -46,7 +113,7 @@ router.get('/signerByUUID', async (req, res) => {
   }
 });
 
-router.get('/signersByFid', async (req, res) => {
+signersRouter.get('/signersByFid', async (req, res) => {
   const serviceResponse = await signerServiceInstance.findByFid(
     Number(req.query.fid)
   );
@@ -54,26 +121,26 @@ router.get('/signersByFid', async (req, res) => {
   return handleServiceResponse(serviceResponse, res);
 });
 
-router.get('/allSigners', async (_req, res) => {
+signersRouter.get('/allSigners', async (_req, res) => {
   const serviceResponse = await signerServiceInstance.findAll();
 
   return handleServiceResponse(serviceResponse, res);
 });
 
-router.get('/approvedSignersAllowance', async (_req, res) => {
+signersRouter.get('/approvedSignersAllowance', async (_req, res) => {
   const serviceResponse =
     await signerServiceInstance.fetchApprovedSignersAllowance();
 
   handleServiceResponse(serviceResponse, res);
 });
 
-router.get('/currentPooledTips', async (_req, res) => {
+signersRouter.get('/currentPooledTips', async (_req, res) => {
   const serviceResponse = await signerServiceInstance.fetchCurrentPooledTips();
 
   handleServiceResponse(serviceResponse, res);
 });
 
-router.post('/signers', async (req, res, next) => {
+signersRouter.post('/signers', async (req, res, next) => {
   try {
     if (req.body) {
       await Signer.validate(req.body);
@@ -88,26 +155,16 @@ router.post('/signers', async (req, res, next) => {
   }
 });
 
-router.post('/updateSigner', async (req, res, next) => {
+signersRouter.post('/updateSigner', async (req, res, next) => {
   try {
-    const signer = await Signer.findOne({
-      signer_uuid: { $eq: req.body.signerUUID }
-    });
+    if (req.body) {
+      const serviceResponse = await signerServiceInstance.updateSigner(
+        req.body
+      );
 
-    const _updatedSigner = {
-      ...signer?.toJSON(),
-      signer_uuid: req.body.signerUUID,
-      status: req.body.status,
-      fid: req.body.fid
-    };
-
-    const updatedSigner = new Signer(_updatedSigner);
-    const item = await updatedSigner.updateOne(_updatedSigner);
-
-    res.status(201).send(item);
+      handleServiceResponse(serviceResponse, res);
+    }
   } catch (error) {
     next(error);
   }
 });
-
-export default router;

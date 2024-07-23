@@ -178,6 +178,28 @@ export class SignersService {
       throw new Error(`Error: ${(error as Error).message}`);
     }
   }
+
+  async updateSigner(signer: ISigner) {
+    try {
+      const existingSigner = await Signer.findOne({
+        signer_uuid: { $eq: signer.signer_uuid }
+      });
+
+      const _updatedSigner = {
+        ...existingSigner?.toJSON(),
+        signer_uuid: signer.signer_uuid,
+        status: signer.status,
+        fid: signer.fid
+      };
+
+      const updatedSigner = new Signer(_updatedSigner);
+      const item = await updatedSigner.updateOne(_updatedSigner);
+
+      return item;
+    } catch (error) {
+      throw new Error(`Error: ${(error as Error).message}`);
+    }
+  }
 }
 
 export const signerServiceInstance = new SignersService();
