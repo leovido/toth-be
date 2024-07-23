@@ -3,6 +3,7 @@ import cryptoModule from 'crypto';
 import { client } from './neynar/client';
 import * as Sentry from '@sentry/node';
 import { Round } from './api/rounds/roundsModel';
+import { logger } from './server';
 
 // Function to update rounds
 const updateRounds = async () => {
@@ -28,7 +29,7 @@ const updateRounds = async () => {
       await round.save();
     }
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     throw error;
   }
 };
@@ -62,7 +63,7 @@ const createNewRound = async () => {
 
     return newRound;
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     throw error;
   }
 };
@@ -92,7 +93,7 @@ export const saveWinner = async (roundId: string): Promise<string> => {
       return '';
     }
   } catch (error) {
-    console.error('Error fetching cast winner:', error);
+    logger.error('Error fetching cast winner:', error);
     return '';
   }
 };
