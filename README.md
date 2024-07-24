@@ -47,14 +47,7 @@ git clone https://github.com/leovido/toth-be.git
   ```sh
   npm i && nodemon
   ```
-3. You will also need the following `.env` variables. Make sure to set up MongoDB on your end. 
-
-  ```
-  DB_INSTANCE="mongodb://localhost:27017/tipothehat"
-  PORT=3011
-  PUBLIC_URL="http://localhost:3011"
-  NEYNAR_API_KEY=NEYNAR_API_DOCS
-  ```
+3. Use the `.env.template` to copy to your own `.env`
 
 
 <!-- CONTRIBUTING -->
@@ -66,9 +59,9 @@ If you have a suggestion that would make this better, please fork the repo and c
 Don't forget to give the project a star! Thanks again!
 
 1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
+2. Create your Feature Branch (`git checkout -b feature/amazingFeature`)
+3. Commit your Changes (`git commit -m 'feat: add some amazingFeature'`)
+4. Push to the Branch (`git push origin feature/amazingFeature`)
 5. Open a Pull Request
 
 
@@ -82,5 +75,6 @@ See `LICENSE.txt` for more information.
 ## Contact
 
 Leovido - [@warpcast handle](https://warpcast.com/leovido.eth) - toth.jazz924@passinbox.com
+Papajams - [@warpcast handle](https://warpcast.com/papa)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
