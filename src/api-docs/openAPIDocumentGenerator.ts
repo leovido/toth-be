@@ -1,13 +1,14 @@
 import {
   OpenAPIRegistry,
-  OpenApiGeneratorV3
-} from '@asteasolutions/zod-to-openapi';
+  OpenApiGeneratorV3,
+} from "@asteasolutions/zod-to-openapi";
 
-import { healthCheckRegistry } from '@/api/healthCheck/healthCheckRouter';
-import { helpersRegistry } from '@/api/helpers/helpersRouter';
-import { nominationsRegistry } from '@/api/nominations/nominationsRouter';
-import { roundsRegistry } from '@/api/rounds/roundsRouter';
-import { historyRegistry } from '@/api/history/historyRoute';
+import { healthCheckRegistry } from "@/api/healthCheck/healthCheckRouter";
+import { helpersRegistry } from "@/api/helpers/helpersRouter";
+import { nominationsRegistry } from "@/api/nominations/nominationsRouter";
+import { roundsRegistry } from "@/api/rounds/roundsRouter";
+import { historyRegistry } from "@/api/history/historyRoute";
+import { signersRegistry } from "@/api/signers/signersRoute";
 
 export function generateOpenAPIDocument() {
   const registry = new OpenAPIRegistry([
@@ -15,19 +16,20 @@ export function generateOpenAPIDocument() {
     helpersRegistry,
     nominationsRegistry,
     roundsRegistry,
-    historyRegistry
+    historyRegistry,
+    signersRegistry,
   ]);
   const generator = new OpenApiGeneratorV3(registry.definitions);
 
   return generator.generateDocument({
-    openapi: '3.0.0',
+    openapi: "3.0.0",
     info: {
-      version: '1.0.0',
-      title: 'Swagger API'
+      version: "1.0.0",
+      title: "Swagger API",
     },
     externalDocs: {
-      description: 'View the raw OpenAPI Specification in JSON format',
-      url: '/swagger.json'
-    }
+      description: "View the raw OpenAPI Specification in JSON format",
+      url: "/swagger.json",
+    },
   });
 }
