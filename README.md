@@ -75,6 +75,7 @@ See `LICENSE.txt` for more information.
 ## Contact
 
 Leovido - [@warpcast handle](https://warpcast.com/leovido.eth) - toth.jazz924@passinbox.com
+
 Papajams - [@warpcast handle](https://warpcast.com/papa)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
