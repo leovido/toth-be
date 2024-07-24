@@ -12,7 +12,7 @@ export class VotesService {
     this.votesRepository = repository;
   }
 
-  async createVote(vote: IVote): Promise<ServiceResponse<unknown | null>> {
+  async createVote(vote: IVote) {
     try {
       const currentVote = await this.votesRepository.createVote(vote);
       if (!currentVote) {
@@ -34,18 +34,10 @@ export class VotesService {
     }
   }
 
-  async fetchVotesByRoundId(
-    roundId: string
-  ): Promise<ServiceResponse<IVote[] | null>> {
+  async fetchVotesByRoundId(roundId: string) {
     try {
       const votes = await this.votesRepository.fetchVotesByRoundId(roundId);
-      if (votes.length === 0) {
-        return ServiceResponse.failure(
-          `No votes found for round ${roundId}`,
-          null,
-          StatusCodes.NOT_FOUND
-        );
-      }
+
       return ServiceResponse.success<IVote[]>(
         `Votes found for round ${roundId}`,
         votes
