@@ -4,9 +4,25 @@ import { IVote, Vote } from "./votesModel";
 import { handleServiceResponse } from "@/common/utils/httpHandlers";
 import { votesServiceInstance } from "./votesService";
 import { OpenAPIRegistry } from "@asteasolutions/zod-to-openapi";
+import { createApiResponse } from "@/api-docs/openAPIResponseBuilders";
+import { z } from "zod";
 
 export const votesRegistry = new OpenAPIRegistry();
 export const votesRouter: Router = express.Router();
+
+votesRegistry.registerPath({
+  method: "get",
+  path: "votes/votes",
+  tags: ["signers"],
+  responses: createApiResponse(z.null(), "Success"),
+});
+
+votesRegistry.registerPath({
+  method: "post",
+  path: "votes/votes",
+  tags: ["signers"],
+  responses: createApiResponse(z.null(), "Success"),
+});
 
 votesRouter.post("/votes", async (req, res, next) => {
   try {

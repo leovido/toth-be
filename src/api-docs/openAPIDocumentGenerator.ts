@@ -9,6 +9,7 @@ import { nominationsRegistry } from "@/api/nominations/nominationsRouter";
 import { roundsRegistry } from "@/api/rounds/roundsRouter";
 import { historyRegistry } from "@/api/history/historyRoute";
 import { signersRegistry } from "@/api/signers/signersRoute";
+import { votesRegistry } from "@/api/votes/votesRouter";
 
 export function generateOpenAPIDocument() {
   const registry = new OpenAPIRegistry([
@@ -18,6 +19,7 @@ export function generateOpenAPIDocument() {
     roundsRegistry,
     historyRegistry,
     signersRegistry,
+    votesRegistry,
   ]);
   const generator = new OpenApiGeneratorV3(registry.definitions);
 
