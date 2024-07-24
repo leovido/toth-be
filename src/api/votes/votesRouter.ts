@@ -13,14 +13,14 @@ export const votesRouter: Router = express.Router();
 votesRegistry.registerPath({
   method: "get",
   path: "votes/votes",
-  tags: ["signers"],
+  tags: ["votes"],
   responses: createApiResponse(z.null(), "Success"),
 });
 
 votesRegistry.registerPath({
   method: "post",
   path: "votes/votes",
-  tags: ["signers"],
+  tags: ["votes"],
   responses: createApiResponse(z.null(), "Success"),
 });
 
