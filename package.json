@@ -5,7 +5,7 @@
   "description": "",
   "main": "src/index.ts",
   "scripts": {
-    "start": "ts-node src/index.ts",
+    "start": "node dist/index.js",
     "dev": "tsx watch --clear-screen=false src/index.ts | pino-pretty",
     "build": "tsup && npm run sentry:sourcemaps",
     "serve": "node dist/index.js",
