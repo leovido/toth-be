@@ -49,6 +49,9 @@ app.use(openAPIRouter);
 
 // MongoDB connection
 mongoose.connect(process.env.DB_INSTANCE ?? "").then(async () => {
+  if (process.env.NODE_ENV === "staging") {
+    return;
+  }
   try {
     await setupCronJobs();
     await cannonCronJob();
