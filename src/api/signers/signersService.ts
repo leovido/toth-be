@@ -204,7 +204,15 @@ export class SignersService {
       const updatedSigner = new Signer(_updatedSigner);
       const item = await updatedSigner.updateOne(_updatedSigner);
 
-      return ServiceResponse.success<ISigner>("Signer created", item);
+      if (item.acknowledged) {
+        return ServiceResponse.success<ISigner>("Signer updated", item);
+      } else {
+        return ServiceResponse.failure(
+          "Signer not updated",
+          null,
+          StatusCodes.NOT_FOUND
+        );
+      }
     } catch (ex) {
       const errorMessage = `Error updating a signer: , ${
         (ex as Error).message

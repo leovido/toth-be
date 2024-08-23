@@ -164,7 +164,6 @@ signersRouter.post("/updateSigner", async (req, res, next) => {
       );
     }
   } catch (error) {
-    console.error(error, "here111");
     next(error);
   }
 });
