@@ -76,7 +76,16 @@ export class NominationService {
           StatusCodes.NOT_FOUND
         );
       }
-      return ServiceResponse.success<unknown>("nomination found", nomination);
+
+      if (nomination.length === 0) {
+        return ServiceResponse.failure(
+          "Nomination not found",
+          null,
+          StatusCodes.NOT_FOUND
+        );
+      } else {
+        return ServiceResponse.success<unknown>("nomination found", nomination);
+      }
     } catch (ex) {
       const errorMessage = `Error finding nomination with roundId ${roundId}:, ${
         (ex as Error).message
@@ -100,7 +109,16 @@ export class NominationService {
           StatusCodes.NOT_FOUND
         );
       }
-      return ServiceResponse.success<unknown>("Nomination found", nomination);
+
+      if (nomination.length === 0) {
+        return ServiceResponse.failure(
+          "Nomination not found",
+          null,
+          StatusCodes.NOT_FOUND
+        );
+      } else {
+        return ServiceResponse.success<unknown>("Nomination found", nomination);
+      }
     } catch (ex) {
       const errorMessage = `Error finding nomination with fid ${fid}:, ${
         (ex as Error).message
@@ -125,10 +143,18 @@ export class NominationService {
           StatusCodes.NOT_FOUND
         );
       }
-      return ServiceResponse.success<unknown[]>(
-        "Nominations found",
-        nominations
-      );
+      if (nominations.length === 0) {
+        return ServiceResponse.failure(
+          "No Nominations found",
+          null,
+          StatusCodes.NOT_FOUND
+        );
+      } else {
+        return ServiceResponse.success<unknown[]>(
+          "Nominations found",
+          nominations
+        );
+      }
     } catch (ex) {
       const errorMessage = `Error finding all nominations: $${
         (ex as Error).message
