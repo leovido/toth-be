@@ -22,7 +22,6 @@ export class SignersRepository implements ISignersRepository {
 
   async findByUUID(signerUUID: string) {
     try {
-      console.warn(signerUUID, "here");
       const signer = await Signer.findOne({
         signer_uuid: { $eq: signerUUID },
       });
