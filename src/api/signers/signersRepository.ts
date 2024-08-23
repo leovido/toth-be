@@ -1,5 +1,5 @@
-import { fetchDegenTips } from '@/degen/degenAPI';
-import { ISigner, Signer } from './signersModel';
+import { fetchDegenTips } from "@/degen/degenAPI";
+import { ISigner, Signer } from "./signersModel";
 
 export interface ISignersRepository {
   findAll(): Promise<ISigner[]>;
@@ -22,8 +22,9 @@ export class SignersRepository implements ISignersRepository {
 
   async findByUUID(signerUUID: string) {
     try {
+      console.warn(signerUUID, "here");
       const signer = await Signer.findOne({
-        signer_uuid: { $eq: signerUUID }
+        signer_uuid: { $eq: signerUUID },
       });
 
       if (signer) {
@@ -39,7 +40,7 @@ export class SignersRepository implements ISignersRepository {
   async findByFid(fid: number) {
     try {
       const signer = await Signer.findOne({
-        fid: { $eq: fid }
+        fid: { $eq: fid },
       });
 
       if (signer) {
@@ -54,7 +55,7 @@ export class SignersRepository implements ISignersRepository {
   async findByPublicKey(publicKey: string) {
     try {
       const signer = await Signer.findOne({
-        public_key: { $eq: publicKey }
+        public_key: { $eq: publicKey },
       });
 
       if (signer) {
@@ -72,14 +73,14 @@ export class SignersRepository implements ISignersRepository {
       const allSigners: { fid: number }[] = await Signer.aggregate([
         {
           $match: {
-            status: 'approved'
-          }
+            status: "approved",
+          },
         },
         {
           $project: {
-            fid: '$fid'
-          }
-        }
+            fid: "$fid",
+          },
+        },
       ]);
 
       const tips = await Promise.all(
@@ -88,7 +89,7 @@ export class SignersRepository implements ISignersRepository {
             (tips: { remainingAllowance: string; allowance: string }) => {
               return {
                 fid: signer.fid,
-                tips
+                tips,
               };
             }
           );

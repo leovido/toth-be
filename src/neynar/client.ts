@@ -1,12 +1,12 @@
-import dotenv from 'dotenv';
-import path from 'path';
-import { NeynarAPIClient } from '@neynar/nodejs-sdk';
-import { randomUUID } from 'crypto';
-import { logger } from '@/server';
+import dotenv from "dotenv";
+import path from "path";
+import { NeynarAPIClient } from "@neynar/nodejs-sdk";
+import { randomUUID } from "crypto";
+import { logger } from "@/server";
 
-dotenv.config({ path: path.resolve(__dirname, '../../.env') });
+dotenv.config({ path: path.resolve(__dirname, "../../.env") });
 
-export const client = new NeynarAPIClient(process.env.NEYNAR_API_KEY || '');
+export const client = new NeynarAPIClient(process.env.NEYNAR_API_KEY || "");
 
 export const postCastCannon = async (
   signerUuid: string,
@@ -18,10 +18,10 @@ export const postCastCannon = async (
   try {
     await client.publishCast(signerUuid, text, {
       replyTo: replyTo,
-      idem
+      idem,
     });
   } catch (error) {
-    logger.error('Error posting cast cannon:', error);
+    logger.error("Error posting cast cannon:", error);
     throw error;
   }
 };

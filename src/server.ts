@@ -38,7 +38,7 @@ app.use(bodyParser.json());
 app.use("/health-check", healthCheckRouter);
 app.use("/signers", signersRouter);
 app.use("/history", historyRouter);
-app.use("/round", roundsRouter);
+app.use("/rounds", roundsRouter);
 app.use("/votes", votesRouter);
 app.use("/nominations", nominationsRouter);
 // app.use('/history', historyRoutes);
