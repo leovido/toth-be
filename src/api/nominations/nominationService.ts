@@ -1,9 +1,9 @@
-import { StatusCodes } from 'http-status-codes';
+import { StatusCodes } from "http-status-codes";
 
-import { ServiceResponse } from '@/common/models/serviceResponse';
-import { logger } from '@/server';
-import { MDNominationRepository } from './nominationRepository';
-import { INomination } from './nominationModel';
+import { ServiceResponse } from "@/common/models/serviceResponse";
+import { logger } from "@/server";
+import { MDNominationRepository } from "./nominationRepository";
+import { INomination } from "./nominationModel";
 
 export class NominationService {
   private nominationRepository: MDNominationRepository;
@@ -19,14 +19,14 @@ export class NominationService {
   ): Promise<ServiceResponse<INomination | null>> {
     try {
       const item = await this.nominationRepository.createNomination(nomination);
-      return ServiceResponse.success<INomination>('Nomination created', item);
+      return ServiceResponse.success<INomination>("Nomination created", item);
     } catch (ex) {
       const errorMessage = `Error creating nomination: ${
         (ex as Error).message
       }`;
       logger.error(errorMessage);
       return ServiceResponse.failure(
-        'An error occurred while creating a nomination.',
+        "An error occurred while creating a nomination.",
         null,
         StatusCodes.INTERNAL_SERVER_ERROR
       );
@@ -39,19 +39,19 @@ export class NominationService {
       const nomination = await this.nominationRepository.findById(id);
       if (!nomination) {
         return ServiceResponse.failure(
-          'User not found',
+          "User not found",
           null,
           StatusCodes.NOT_FOUND
         );
       }
-      return ServiceResponse.success<unknown>('nomination found', nomination);
+      return ServiceResponse.success<unknown>("nomination found", nomination);
     } catch (ex) {
       const errorMessage = `Error finding nomination with id ${id}:, ${
         (ex as Error).message
       }`;
       logger.error(errorMessage);
       return ServiceResponse.failure(
-        'An error occurred while finding a nomination.',
+        "An error occurred while finding a nomination.",
         null,
         StatusCodes.INTERNAL_SERVER_ERROR
       );
@@ -63,19 +63,19 @@ export class NominationService {
       const nomination = await this.nominationRepository.findByRound(roundId);
       if (!nomination) {
         return ServiceResponse.failure(
-          'User not found',
+          "User not found",
           null,
           StatusCodes.NOT_FOUND
         );
       }
-      return ServiceResponse.success<unknown>('nomination found', nomination);
+      return ServiceResponse.success<unknown>("nomination found", nomination);
     } catch (ex) {
       const errorMessage = `Error finding nomination with roundId ${roundId}:, ${
         (ex as Error).message
       }`;
       logger.error(errorMessage);
       return ServiceResponse.failure(
-        'An error occurred while finding a nomination.',
+        "An error occurred while finding a nomination.",
         null,
         StatusCodes.INTERNAL_SERVER_ERROR
       );
@@ -87,19 +87,19 @@ export class NominationService {
       const nomination = await this.nominationRepository.findByFid(fid);
       if (!nomination) {
         return ServiceResponse.failure(
-          'Nomination not found',
+          "Nomination not found",
           null,
           StatusCodes.NOT_FOUND
         );
       }
-      return ServiceResponse.success<unknown>('Nomination found', nomination);
+      return ServiceResponse.success<unknown>("Nomination found", nomination);
     } catch (ex) {
       const errorMessage = `Error finding nomination with fid ${fid}:, ${
         (ex as Error).message
       }`;
       logger.error(errorMessage);
       return ServiceResponse.failure(
-        'An error occurred while finding a nomination.',
+        "An error occurred while finding a nomination.",
         null,
         StatusCodes.INTERNAL_SERVER_ERROR
       );
@@ -112,13 +112,13 @@ export class NominationService {
         await this.nominationRepository.findTodaysNominations();
       if (!nominations || nominations.length === 0) {
         return ServiceResponse.failure(
-          'No Nominations found',
+          "No Nominations found",
           null,
           StatusCodes.NOT_FOUND
         );
       }
       return ServiceResponse.success<unknown[]>(
-        'Nominations found',
+        "Nominations found",
         nominations
       );
     } catch (ex) {
@@ -127,7 +127,7 @@ export class NominationService {
       }`;
       logger.error(errorMessage);
       return ServiceResponse.failure(
-        'An error occurred while retrieving nominations',
+        "An error occurred while retrieving nominations",
         null,
         StatusCodes.INTERNAL_SERVER_ERROR
       );

@@ -133,3 +133,16 @@ nominationsRouter.get("/nominations", async (req, res, next) => {
     next(error);
   }
 });
+
+// Fetches the current nominations for TODAY
+nominationsRouter.post("/nominations", async (req, res, next) => {
+  try {
+    const serviceResponse = await nominationServiceInstance.createNomination(
+      req.body
+    );
+
+    return handleServiceResponse(serviceResponse, res);
+  } catch (error) {
+    next(error);
+  }
+});
