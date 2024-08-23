@@ -44,7 +44,15 @@ export class NominationService {
           StatusCodes.NOT_FOUND
         );
       }
-      return ServiceResponse.success<unknown>("nomination found", nomination);
+      if (nomination.length === 0) {
+        return ServiceResponse.failure(
+          "Nomination not found",
+          null,
+          StatusCodes.NOT_FOUND
+        );
+      } else {
+        return ServiceResponse.success<unknown>("nomination found", nomination);
+      }
     } catch (ex) {
       const errorMessage = `Error finding nomination with id ${id}:, ${
         (ex as Error).message
