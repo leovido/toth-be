@@ -12,5 +12,6 @@ module.exports = {
     {
       prefix: '<rootDir>/'
     }
-  )
+  ),
+  testPathIgnorePatterns: ['<rootDir>/dist/']
 };
