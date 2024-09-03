@@ -5,6 +5,37 @@ import { fetchDegenTips } from "../degen/degenAPI";
 
 const router = express.Router();
 
+router.get("/currentPooledTips", async (_req, res, next) => {
+  try {
+    const allSigners: { fid: number }[] = await Signer.aggregate([
+      {
+        $match: {
+          status: "approved",
+        },
+      },
+      {
+        $project: {
+          fid: "$fid",
+        },
+      },
+    ]);
+
+    const pooledTips = await Promise.all(
+      allSigners.map((signer) => {
+        return fetchDegenTips(signer.fid);
+      })
+    );
+
+    const totalPooledTips = pooledTips.reduce((acc, curr) => {
+      return acc + parseFloat(curr.remainingAllowance);
+    }, 0);
+
+    res.status(200).json({ totalPooledTips });
+  } catch (error) {
+    next(error);
+  }
+});
+
 router.get("/signers", async (req, res, next) => {
   try {
     const signer = await Signer.findOne({
@@ -120,7 +151,7 @@ router.get("/currentPooledTips", async (_req, res, next) => {
       return acc + parseFloat(curr.remainingAllowance);
     }, 0);
 
-    res.status(200).send({ totalPooledTips });
+    res.status(200).json({ totalPooledTips });
   } catch (error) {
     next(error);
   }
