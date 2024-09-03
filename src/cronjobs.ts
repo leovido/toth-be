@@ -22,7 +22,10 @@ const updateRounds = async () => {
         round.votingStartTime = now;
       } else if (round.status === "voting") {
         round.status = "completed";
-        round.winner = await saveWinner(round.id);
+        const { castHash, castURL, nominationId } = await saveWinner(round.id);
+        round.winner = castHash;
+        round.castURL = castURL;
+        round.nominationId = nominationId;
       }
 
       await round.save();
@@ -67,7 +70,7 @@ const createNewRound = async () => {
   }
 };
 
-export const saveWinner = async (roundId: string): Promise<string> => {
+export const findCastWinner = async (roundId: string) => {
   const endpoint = `${process.env.PUBLIC_URL}/nominationsByRound?roundId=${roundId}`;
 
   try {
@@ -82,18 +85,31 @@ export const saveWinner = async (roundId: string): Promise<string> => {
       );
       const castWinner = sorted[0];
 
-      const cast = await client.lookUpCastByHashOrWarpcastUrl(
-        `https://warpcast.com/${castWinner.username}/${castWinner.castId}`,
-        "url"
-      );
-
-      return cast.cast.hash;
+      return castWinner;
     } else {
       return "";
     }
   } catch (error) {
-    console.error("Error fetching cast winner:", error);
-    return "";
+    console.error("Error finding cast winner:", error);
+    throw error;
+  }
+};
+
+export const saveWinner = async (roundId: string) => {
+  try {
+    const castWinner = await findCastWinner(roundId);
+    const castURL = `https://warpcast.com/${castWinner.username}/${castWinner.castId}`;
+
+    const cast = await client.lookUpCastByHashOrWarpcastUrl(castURL, "url");
+
+    return {
+      castURL: castURL,
+      castHash: cast.cast.hash,
+      nominationId: castWinner.id,
+    };
+  } catch (error) {
+    console.error("Error saving winner:", error);
+    throw error;
   }
 };
 

@@ -31,6 +31,8 @@ const schemaDefinition = {
   },
   status: String, // active, voting, completed
   winner: { type: String, required: false },
+  castURL: { type: String, required: false },
+  nominationId: { type: String, required: false },
 } as const;
 
 const roundSchema = new mongoose.Schema(schemaDefinition);
@@ -45,6 +47,8 @@ export interface IRound extends mongoose.Document {
   createdAt: Date;
   status: string;
   winner: string;
+  castURL?: string;
+  nominationId?: string;
 }
 
 export const Round = mongoose.model<IRound>("Round", roundSchema);
