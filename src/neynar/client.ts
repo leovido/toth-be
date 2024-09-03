@@ -2,6 +2,7 @@ import dotenv from "dotenv";
 import path from "path";
 import { NeynarAPIClient } from "@neynar/nodejs-sdk";
 import { randomUUID } from "crypto";
+import { logger } from "@/server";
 
 dotenv.config({ path: path.resolve(__dirname, "../../.env") });
 
@@ -20,7 +21,7 @@ export const postCastCannon = async (
       idem,
     });
   } catch (error) {
-    console.error("Error posting cast cannon:", error);
+    logger.error("Error posting cast cannon:", error);
     throw error;
   }
 };

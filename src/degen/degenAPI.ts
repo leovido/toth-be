@@ -1,4 +1,4 @@
-import fetch from "node-fetch";
+import fetch from 'node-fetch';
 
 export const fetchDegenTips = async (
   fid: number
@@ -6,35 +6,35 @@ export const fetchDegenTips = async (
   const degenResponse = await fetch(
     `https://www.degentip.me/api/get_allowance?fid=${fid}`,
     {
-      method: "GET",
+      method: 'GET',
       headers: {
-        "Content-Type": "application/json",
-      },
+        'Content-Type': 'application/json'
+      }
     }
   );
 
   if (!degenResponse.ok) {
-    throw new Error("Failed to fetch data from degen.tips");
+    throw new Error('Failed to fetch data from degen.tips');
   }
 
   const degenJson = await degenResponse.json();
 
   if (degenJson.Error) {
     return {
-      remainingAllowance: "0",
-      allowance: "0",
+      remainingAllowance: '0',
+      allowance: '0'
     };
   }
 
   if (degenJson.allowance) {
     return {
       remainingAllowance: degenJson.allowance.remaining_allowance,
-      allowance: degenJson.allowance.tip_allowance,
+      allowance: degenJson.allowance.tip_allowance
     };
   } else {
     return {
-      remainingAllowance: "0",
-      allowance: "0",
+      remainingAllowance: '0',
+      allowance: '0'
     };
   }
 };
@@ -43,20 +43,19 @@ export const tipDistribution = async (fid: number) => {
   const tipAmount = await fetchDegenTips(fid);
   const remainingAllowance = parseFloat(tipAmount.remainingAllowance);
 
-  console.warn(tipAmount, "here");
   if (isNaN(remainingAllowance)) {
-    throw new Error("Invalid remaining allowance");
+    throw new Error('Invalid remaining allowance');
   }
 
   if (remainingAllowance < 1) {
     throw new Error(
-      "Invalid tip distribution. You have no remaining allowance to distribute"
+      'Invalid tip distribution. You have no remaining allowance to distribute'
     );
   }
 
   if (remainingAllowance < 7) {
     throw new Error(
-      "Invalid tip distribution. Minimum is 7 $DEGEN remaining on your remaining allowance"
+      'Invalid tip distribution. Minimum is 7 $DEGEN remaining on your remaining allowance'
     );
   }
 
@@ -67,6 +66,6 @@ export const tipDistribution = async (fid: number) => {
 
   return {
     tothCut,
-    castWinnerEarnings,
+    castWinnerEarnings
   };
 };
