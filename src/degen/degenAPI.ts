@@ -43,7 +43,6 @@ export const tipDistribution = async (fid: number) => {
   const tipAmount = await fetchDegenTips(fid);
   const remainingAllowance = parseFloat(tipAmount.remainingAllowance);
 
-  console.warn(tipAmount, "here");
   if (isNaN(remainingAllowance)) {
     throw new Error("Invalid remaining allowance");
   }
