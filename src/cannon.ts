@@ -14,7 +14,9 @@ export const fetchApprovedSigners = async (): Promise<Signer[]> => {
 
     const approvedSigners = await Promise.all(
       signers.map(async (signer: Signer) => {
-        return await client.lookupDeveloperManagedSigner(signer.public_key);
+        if (signer.public_key) {
+          return await client.lookupDeveloperManagedSigner(signer.public_key);
+        }
       })
     );
 
