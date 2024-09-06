@@ -35,6 +35,94 @@ router.get("/rounds", (req, res) => {
     .catch((err: unknown) => res.status(500).send(err));
 });
 
+router.get("/allNominationsForRounds", async (req, res) => {
+  try {
+    const allNominationsForRounds = await Round.aggregate([
+      {
+        $lookup: {
+          from: "nominations",
+          localField: "id",
+          foreignField: "roundId",
+          as: "nominations",
+        },
+      },
+      {
+        // Filter out rounds that have empty nominations arrays
+        $match: {
+          nominations: { $ne: [] },
+        },
+      },
+      {
+        $unwind: "$nominations", // Flatten the nominations array
+      },
+      {
+        $group: {
+          _id: "$roundNumber", // Group by roundNumber
+          roundNumber: { $first: "$roundNumber" }, // Add roundNumber field
+          nominations: {
+            $push: "$nominations", // Directly push nominations without nesting
+          },
+        },
+      },
+      {
+        $project: {
+          _id: 0, // Exclude the _id field
+          roundNumber: 1,
+          nominations: 1,
+        },
+      },
+    ]);
+
+    res.status(200).send(allNominationsForRounds);
+  } catch (error) {
+    res.status(500).send(error);
+  }
+});
+
+router.get("/allVotesForRounds", async (req, res) => {
+  try {
+    const allVotesForRounds = await Round.aggregate([
+      {
+        $lookup: {
+          from: "votes",
+          localField: "id",
+          foreignField: "roundId",
+          as: "votes",
+        },
+      },
+      {
+        // Filter out rounds that have empty nominations arrays
+        $match: {
+          votes: { $ne: [] },
+        },
+      },
+      {
+        $unwind: "$votes", // Flatten the nominations array
+      },
+      {
+        $group: {
+          _id: "$roundNumber", // Group by roundNumber
+          roundNumber: { $first: "$roundNumber" }, // Add roundNumber field
+          votes: {
+            $push: "$votes", // Directly push nominations without nesting
+          },
+        },
+      },
+      {
+        $project: {
+          _id: 0, // Exclude the _id field
+          roundNumber: 1,
+          votes: 1,
+        },
+      },
+    ]);
+
+    res.status(200).send(allVotesForRounds);
+  } catch (error) {
+    res.status(500).send(error);
+  }
+});
+
 router.get("/latest-round", async (_req, res, next) => {
   try {
     await Round.findOne({
