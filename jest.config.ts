@@ -4,4 +4,5 @@ module.exports = {
     "^.+\\.(ts|tsx)$": "ts-jest",
   },
   setupFilesAfterEnv: ["./setupTests.ts"],
+  testEnvironment: "jest-environment-node",
 };
