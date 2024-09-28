@@ -148,6 +148,50 @@ router.get("/allNominationsForRounds", async (req, res) => {
   }
 });
 
+router.get("/winners", async (req, res) => {
+  try {
+    const allNominationsForRounds = await Round.aggregate([
+      {
+        $lookup: {
+          from: "nominations",
+          localField: "id",
+          foreignField: "roundId",
+          as: "nominations",
+        },
+      },
+      {
+        // Filter out rounds that have empty nominations arrays
+        $match: {
+          nominations: { $ne: [] },
+        },
+      },
+      {
+        $unwind: "$nominations", // Flatten the nominations array
+      },
+      {
+        $group: {
+          _id: "$roundNumber", // Group by roundNumber
+          roundNumber: { $first: "$roundNumber" }, // Add roundNumber field
+          nominations: {
+            $push: "$nominations", // Directly push nominations without nesting
+          },
+        },
+      },
+      {
+        $project: {
+          _id: 0, // Exclude the _id field
+          roundNumber: 1,
+          nominations: 1,
+        },
+      },
+    ]);
+
+    res.status(200).send(allNominationsForRounds);
+  } catch (error) {
+    res.status(500).send(error);
+  }
+});
+
 router.get("/allVotesForRounds", async (req, res) => {
   try {
     const allVotesForRounds = await Round.aggregate([
