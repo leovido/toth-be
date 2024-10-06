@@ -2,6 +2,7 @@
 import express from "express";
 import cryptoModule from "crypto";
 import { Round } from "../schemas/round";
+import { client } from "../neynar/client";
 
 const router = express.Router();
 
@@ -33,6 +34,48 @@ router.get("/rounds", (req, res) => {
   Round.find()
     .then((votes: unknown) => res.status(200).send(votes))
     .catch((err: unknown) => res.status(500).send(err));
+});
+
+router.get("/winners", async (req, res) => {
+  const rounds = await Round.find();
+
+  const winners = await Promise.all(
+    rounds.map(async (round) => {
+      const endpoint = `${process.env.PUBLIC_URL}/nominationsByRound?roundId=${round.id}`;
+
+      try {
+        const response = await fetch(endpoint);
+        const json = await response.json();
+
+        const isEmpty = json.length === 0;
+        if (!isEmpty) {
+          const sorted = json.sort(
+            (a: { votesCount: number }, b: { votesCount: number }) =>
+              b.votesCount - a.votesCount
+          );
+          const castWinner = sorted[0];
+
+          console.log("castWinner", castWinner);
+          const cast = await client.lookUpCastByHashOrWarpcastUrl(
+            `https://warpcast.com/${castWinner.username}/${castWinner.castId}`,
+            "url"
+          );
+
+          return {
+            roundNumber: round.roundNumber,
+            winner: cast,
+          };
+        } else {
+          return "";
+        }
+      } catch (error) {
+        console.error("Error fetching cast winner:", error);
+        return "";
+      }
+    })
+  );
+
+  return res.json(winners);
 });
 
 router.get("/allNominationsForRounds", async (req, res) => {
