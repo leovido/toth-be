@@ -3,6 +3,7 @@ import express from "express";
 import cryptoModule from "crypto";
 import { Round } from "../schemas/round";
 import { client } from "../neynar/client";
+import { CastResponse } from "@neynar/nodejs-sdk/build/neynar-api/v2";
 
 const router = express.Router();
 
@@ -55,15 +56,23 @@ router.get("/winners", async (req, res) => {
           );
           const castWinner = sorted[0];
 
-          console.log("castWinner", castWinner);
-          const cast = await client.lookUpCastByHashOrWarpcastUrl(
+          const cast: CastResponse = await client.lookUpCastByHashOrWarpcastUrl(
             `https://warpcast.com/${castWinner.username}/${castWinner.castId}`,
             "url"
           );
 
+          const result = {
+            roundNumber: round.roundNumber,
+            fid: cast.cast.author.fid,
+            text: cast.cast.text,
+            rootParentUrl: cast.cast.root_parent_url,
+            date: cast.cast.timestamp,
+            username: cast.cast.author.username,
+          };
+
           return {
             roundNumber: round.roundNumber,
-            winner: cast,
+            winner: result,
           };
         } else {
           return "";
