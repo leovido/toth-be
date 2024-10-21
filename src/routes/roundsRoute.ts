@@ -80,7 +80,7 @@ router.get("/winners", async (req, res) => {
         }
       } catch (error) {
         console.error("Error fetching cast winner:", error);
-        return "";
+        throw error;
       }
     })
   );
