@@ -86,7 +86,6 @@ router.get("/winners", async (req, res) => {
   );
 
   const sortedWinners = winners
-    .filter((winner) => winner !== "") // Filter out empty winners
     .sort((a, b) => b.roundNumber - a.roundNumber) // Sort by round number
     .slice(0, limit); // Get the first 10 winners
 
