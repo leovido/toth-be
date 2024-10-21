@@ -76,7 +76,7 @@ router.get("/winners", async (req, res) => {
             winner: result,
           };
         } else {
-          return "";
+          throw new Error("No nominations found");
         }
       } catch (error) {
         console.error("Error fetching cast winner:", error);
