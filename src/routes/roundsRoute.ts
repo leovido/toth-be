@@ -38,7 +38,7 @@ router.get("/rounds", (req, res) => {
 });
 
 router.get("/winners", async (req, res) => {
-  const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
+  const limit = req.query.limit ? parseInt(req.query.limit as string) : 200;
   const rounds = await Round.find();
 
   const winners = await Promise.all(
@@ -80,12 +80,14 @@ router.get("/winners", async (req, res) => {
         }
       } catch (error) {
         console.error("Error fetching cast winner:", error);
-        throw error;
+        return "";
       }
     })
   );
 
-  const sortedWinners = winners
+  const win = winners.filter((winner) => winner !== ""); // Filter out empty winners
+
+  const sortedWinners = win
     .sort((a, b) => b.roundNumber - a.roundNumber) // Sort by round number
     .slice(0, limit); // Get the first 10 winners
 
