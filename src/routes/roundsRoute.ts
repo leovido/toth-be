@@ -2,6 +2,8 @@
 import express from "express";
 import cryptoModule from "crypto";
 import { Round } from "../schemas/round";
+import { client } from "../neynar/client";
+import { CastResponse } from "@neynar/nodejs-sdk/build/neynar-api/v2";
 
 const router = express.Router();
 
@@ -33,6 +35,73 @@ router.get("/rounds", (req, res) => {
   Round.find()
     .then((votes: unknown) => res.status(200).send(votes))
     .catch((err: unknown) => res.status(500).send(err));
+});
+
+router.get("/winners", async (req, res) => {
+  try {
+    const limit = req.query.limit ? parseInt(req.query.limit as string) : 200;
+
+    const rounds = await Round.find({ status: "completed" })
+      .sort({ roundNumber: -1 })
+      .limit(limit);
+
+    const winners = await Promise.all(
+      rounds.map(async (round) => {
+        if (!round || !round.id || !round.roundNumber) {
+          return null;
+        }
+
+        const endpoint = `${process.env.PUBLIC_URL}/nominationsByRound?roundId=${round.id}`;
+
+        try {
+          const response = await fetch(endpoint);
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          const json = await response.json();
+
+          if (!json || json.length === 0) {
+            return null;
+          }
+
+          const sorted = json.sort(
+            (a: { votesCount: number }, b: { votesCount: number }) =>
+              b.votesCount - a.votesCount
+          );
+          const castWinner = sorted[0];
+
+          const cast: CastResponse = await client.lookUpCastByHashOrWarpcastUrl(
+            `https://warpcast.com/${castWinner.username}/${castWinner.castId}`,
+            "url"
+          );
+
+          const result = {
+            roundNumber: round.roundNumber,
+            fid: cast.cast.author.fid,
+            text: cast.cast.text,
+            rootParentUrl: cast.cast.root_parent_url,
+            date: cast.cast.timestamp,
+            username: cast.cast.author.username,
+          };
+
+          return {
+            roundNumber: round.roundNumber,
+            winner: result,
+          };
+        } catch (error) {
+          console.error(`Error processing round ${round.roundNumber}:`, error);
+          return null;
+        }
+      })
+    );
+
+    const validWinners = winners.filter((winner) => winner !== null);
+
+    return res.json(validWinners);
+  } catch (error) {
+    console.error("Error in /winners endpoint:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
 });
 
 router.get("/allNominationsForRounds", async (req, res) => {

@@ -4,7 +4,7 @@ export const fetchDegenTips = async (
   fid: number
 ): Promise<{ remainingAllowance: string; allowance: string }> => {
   const degenResponse = await fetch(
-    `https://www.degentip.me/api/get_allowance?fid=${fid}`,
+    `https://api.degen.tips/airdrop2/allowances?fid=${fid}`,
     {
       method: "GET",
       headers: {
@@ -17,24 +17,20 @@ export const fetchDegenTips = async (
     throw new Error("Failed to fetch data from degen.tips");
   }
 
-  const degenJson = await degenResponse.json();
+  const degenJson: {
+    tip_allowance: string;
+    remaining_tip_allowance: string;
+  }[] = await degenResponse.json();
 
-  if (degenJson.Error) {
+  if (degenJson.length === 0) {
     return {
       remainingAllowance: "0",
       allowance: "0",
-    };
-  }
-
-  if (degenJson.allowance) {
-    return {
-      remainingAllowance: degenJson.allowance.remaining_allowance,
-      allowance: degenJson.allowance.tip_allowance,
     };
   } else {
     return {
-      remainingAllowance: "0",
-      allowance: "0",
+      remainingAllowance: degenJson[0].remaining_tip_allowance,
+      allowance: degenJson[0].tip_allowance,
     };
   }
 };
