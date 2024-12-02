@@ -221,6 +221,32 @@ router.get("/nominationsByFid", (req, res) => {
     .catch((err: unknown) => res.status(500).send(err));
 });
 
+router.get("/nominationsByFidAndDate", (req, res) => {
+  const startDate = new Date(req.query.startDate as string);
+  const endDate = new Date(req.query.endDate as string);
+
+  const pipeline: PipelineStage[] = [
+    {
+      $match: {
+        createdAt: {
+          $gte: startDate,
+          $lte: endDate,
+        },
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        fid: 1,
+      },
+    },
+  ];
+
+  Nomination.aggregate(pipeline)
+    .then((nominations: unknown) => res.status(200).send(nominations))
+    .catch((err: unknown) => res.status(500).send(err));
+});
+
 // Fetches the current nominations for TODAY
 router.get("/nominations", (req, res) => {
   const startToday = new Date();

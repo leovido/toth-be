@@ -38,19 +38,32 @@ router.get("/rounds", (req, res) => {
 });
 
 router.get("/winners", async (req, res) => {
-  const limit = req.query.limit ? parseInt(req.query.limit as string) : 200;
-  const rounds = await Round.find();
+  try {
+    const limit = req.query.limit ? parseInt(req.query.limit as string) : 200;
 
-  const winners = await Promise.all(
-    rounds.map(async (round) => {
-      const endpoint = `${process.env.PUBLIC_URL}/nominationsByRound?roundId=${round.id}`;
+    const rounds = await Round.find({ status: "completed" })
+      .sort({ roundNumber: -1 })
+      .limit(limit);
 
-      try {
-        const response = await fetch(endpoint);
-        const json = await response.json();
+    const winners = await Promise.all(
+      rounds.map(async (round) => {
+        if (!round || !round.id || !round.roundNumber) {
+          return null;
+        }
 
-        const isEmpty = json.length === 0;
-        if (!isEmpty) {
+        const endpoint = `${process.env.PUBLIC_URL}/nominationsByRound?roundId=${round.id}`;
+
+        try {
+          const response = await fetch(endpoint);
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          const json = await response.json();
+
+          if (!json || json.length === 0) {
+            return null;
+          }
+
           const sorted = json.sort(
             (a: { votesCount: number }, b: { votesCount: number }) =>
               b.votesCount - a.votesCount
@@ -75,22 +88,20 @@ router.get("/winners", async (req, res) => {
             roundNumber: round.roundNumber,
             winner: result,
           };
-        } else {
-          throw new Error("No nominations found");
+        } catch (error) {
+          console.error(`Error processing round ${round.roundNumber}:`, error);
+          return null;
         }
-      } catch (error) {
-        return "";
-      }
-    })
-  );
+      })
+    );
 
-  const win = winners.filter((winner) => winner !== ""); // Filter out empty winners
+    const validWinners = winners.filter((winner) => winner !== null);
 
-  const sortedWinners = win
-    .sort((a, b) => b.roundNumber - a.roundNumber) // Sort by round number
-    .slice(0, limit); // Get the first 10 winners
-
-  return res.json(sortedWinners);
+    return res.json(validWinners);
+  } catch (error) {
+    console.error("Error in /winners endpoint:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
 });
 
 router.get("/allNominationsForRounds", async (req, res) => {
