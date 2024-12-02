@@ -40,14 +40,19 @@ app.use(helperRoutes);
 const port = process.env.PORT || 3011;
 
 // MongoDB connection
-mongoose.connect(process.env.DB_INSTANCE ?? "").then(async () => {
-  try {
-    await setupCronJobs();
-    await cannonCronJob();
-  } catch (error) {
+mongoose
+  .connect(process.env.DB_INSTANCE ?? "")
+  .then(async () => {
+    try {
+      await setupCronJobs();
+      await cannonCronJob();
+    } catch (error) {
+      Sentry.captureException(error);
+    }
+  })
+  .catch((error) => {
     Sentry.captureException(error);
-  }
-});
+  });
 
 const db = mongoose.connection;
 db.on("error", console.error.bind(console, "connection error:"));
