@@ -237,6 +237,8 @@ router.get("/nominationsByFidAndDate", (req, res) => {
     {
       $project: {
         _id: 0,
+        username: 1,
+        castId: 1,
         fid: 1,
       },
     },

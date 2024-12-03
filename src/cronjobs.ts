@@ -1,6 +1,6 @@
 import cron from "node-cron";
 import { Round } from "./schemas/round";
-import cryptoModule from "crypto";
+import cryptoModule, { randomUUID } from "crypto";
 import { client } from "./neynar/client";
 import * as Sentry from "@sentry/node";
 
@@ -113,6 +113,38 @@ export const saveWinner = async (roundId: string) => {
   }
 };
 
+const sendDm = async () => {
+  const startDate = new Date();
+  startDate.setUTCHours(0, 0, 0, 0);
+
+  const endDate = new Date();
+  endDate.setUTCHours(18, 0, 0, 0);
+
+  const result = await fetch(
+    `${process.env.PUBLIC_URL}/nominationsByFidAndDate?startDate=${startDate}&endDate=${endDate}`
+  );
+  const json: { fid: number; username: string; castId: string }[] =
+    await result.json();
+
+  const requestHeaders: HeadersInit = new Headers();
+  requestHeaders.set("Content-Type", "application/json");
+  requestHeaders.set("Authorization", `Bearer ${process.env.FC_API_KEY}`);
+
+  await Promise.all(
+    json.map((value) =>
+      fetch(`https://api.warpcast.com/v2/ext-send-direct-cast`, {
+        headers: requestHeaders,
+        method: "PUT",
+        body: JSON.stringify({
+          recipientFid: value.fid,
+          message: `Hello, you have nominated the following cast:\n\nhttps://warpcast.com/${value.username}/${value.castId}\n\nYou can now vote via the frame below:\n\nhttps://toth-frame.vercel.app/toth`,
+          idempotencyKey: randomUUID().toString(),
+        }),
+      })
+    )
+  );
+};
+
 // Export the cron job setup function
 export const setupCronJobs = async () => {
   cron.schedule("0 0 * * *", async () => {
@@ -123,5 +155,9 @@ export const setupCronJobs = async () => {
   cron.schedule("0 18 * * *", async () => {
     await updateRounds();
     Sentry.captureMessage("Updating rounds: 6 PM UTC");
+  });
+
+  cron.schedule("0 18 * * *", async () => {
+    await sendDm();
   });
 };
