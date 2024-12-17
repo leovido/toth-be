@@ -257,9 +257,9 @@ router.get("/latest-round", async (_req, res, next) => {
 			.limit(1);
 
 		if (!round) {
-			return res
-				.status(404)
-				.json({ message: "No completed round found for previous day" });
+			return res.status(200).json({
+				winner: "",
+			});
 		}
 
 		return res.status(200).json(round);

@@ -74,7 +74,9 @@ const createNewRound = async () => {
 	}
 };
 
-export const findCastWinner = async (roundId: string) => {
+export const findCastWinner = async (
+	roundId: string,
+): Promise<{ id: string; castId: string; username: string }> => {
 	const endpoint = `${process.env.PUBLIC_URL}/nominationsByRound?roundId=${roundId}`;
 
 	try {
@@ -90,9 +92,13 @@ export const findCastWinner = async (roundId: string) => {
 			const castWinner = sorted[0];
 
 			return castWinner;
-		} else {
-			return "";
 		}
+
+		return {
+			id: randomUUID(),
+			castId: "https://warpcast.com/tipothehat/0xe2ea9f4d",
+			username: "tipothehat",
+		};
 	} catch (error) {
 		Sentry.captureException(`Error finding cast winner: ${error}`);
 		throw error;
