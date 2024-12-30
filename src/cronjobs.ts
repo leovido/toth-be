@@ -124,17 +124,10 @@ export const saveWinner = async (roundId: string) => {
 };
 
 const sendDmWithWinner = async () => {
-	const startDate = new Date();
-	startDate.setUTCHours(0, 0, 0, 0);
-
-	const endDate = new Date();
-	endDate.setUTCHours(18, 1, 0, 0);
-
 	const result = await fetch(
 		`${process.env.PUBLIC_URL}/latest-round`,
 	);
-	const json =
-		await result.json();
+	const json = await result.json();
 
 	const requestHeaders: HeadersInit = new Headers();
 	requestHeaders.set("Content-Type", "application/json");
