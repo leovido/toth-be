@@ -123,6 +123,31 @@ export const saveWinner = async (roundId: string) => {
 	}
 };
 
+const sendDmWithWinner = async () => {
+	const result = await fetch(
+		`${process.env.PUBLIC_URL}/latest-round`,
+	);
+	const json = await result.json();
+
+	const requestHeaders: HeadersInit = new Headers();
+	requestHeaders.set("Content-Type", "application/json");
+	requestHeaders.set("Authorization", `Bearer ${process.env.FC_API_KEY}`);
+
+	await Promise.all(
+		json.map(() =>
+			fetch(`https://api.warpcast.com/v2/ext-send-direct-cast`, {
+				headers: requestHeaders,
+				method: "PUT",
+				body: JSON.stringify({
+					recipientFid: 203666,
+					message: `Here is the winner of the last round: ${JSON.stringify(json)}`,
+					idempotencyKey: randomUUID().toString(),
+				}),
+			}),
+		),
+	);
+};
+
 const sendDm = async () => {
 	const startDate = new Date();
 	startDate.setUTCHours(0, 0, 0, 0);
@@ -170,6 +195,7 @@ export const setupCronJobs = async () => {
 	cron.schedule("1 18 * * *", async () => {
 		try {
 			await sendDm();
+			await sendDmWithWinner();
 			console.log("DM sent successfully at 18:01");
 		} catch (error) {
 			Sentry.captureException(`Error sending DM: ${error}`);
