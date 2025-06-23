@@ -6,19 +6,23 @@ import fetch from "node-fetch";
 import * as Sentry from "@sentry/node";
 
 export const fetchApprovedSigners = async (): Promise<Signer[]> => {
-	const endpoint = `${process.env.PUBLIC_URL}/allSigners`;
+        const endpoint = `${process.env.PUBLIC_URL}/allSigners`;
 
-	try {
-		const response = await fetch(endpoint);
-		const signers = await response.json();
+        try {
+                const response = await fetch(endpoint);
+                const signers = await response.json();
 
-		const approvedSigners = await Promise.all(
-			signers.map(async (signer: Signer) => {
-				if (signer.public_key) {
-					return await client.lookupDeveloperManagedSigner(signer.public_key);
-				}
-			}),
-		);
+                if (!client) {
+                        throw new Error("NEYNAR_API_KEY is missing");
+                }
+
+                const approvedSigners = await Promise.all(
+                        signers.map(async (signer: Signer) => {
+                                if (signer.public_key) {
+                                        return await client!.lookupDeveloperManagedSigner(signer.public_key);
+                                }
+                        }),
+                );
 
 		const filteredSigners = approvedSigners
 			.filter((signer) => {
